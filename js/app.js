@@ -514,6 +514,7 @@
         '<div class="cart-total-row grand" style="border:none;margin:0;padding-top:0"><span>إجمالي الطلب</span><span>' + fmtPrice(cartTotal()) + '</span></div>' +
         summary +
       '</div>' +
+      (!window.DellmarAccount.loggedIn()?'<p class="form-card"><a href="#/login">سجل دخولك أو اعمل حساب</a> عشان تتابع طلباتك في «طلباتي». تقدر تكمل كضيف كمان.</p>':'') +
       '<form class="form-card" id="order-form" novalidate>' +
         '<div class="field"><label for="f-name">الاسم بالكامل *</label><input id="f-name" name="name" required autocomplete="name" placeholder="مثال: محمود أحمد"></div>' +
         '<div class="field"><label for="f-phone">رقم الموبايل *</label><input id="f-phone" name="phone" required inputmode="tel" autocomplete="tel" dir="ltr" placeholder="01xxxxxxxxx"><div class="hint">هنتواصل معاك على الرقم ده لتأكيد الطلب</div></div>' +
@@ -582,10 +583,16 @@
       message: message
     };
 
-    fetch("https://api.web3forms.com/submit", {
+    var storedOrder=false;
+    var orderCustomer={name:f.get('name'),phone:f.get('phone'),governorate:f.get('governorate'),address:f.get('address'),notes:f.get('notes'),payment:f.get('payment'),payment_ref:f.get('payment_ref')};
+    window.DellmarAccount.storeOrder(orderNo,orderCustomer,Object.keys(c).map(function(sku){return {sku:sku,qty:c[sku]};})).then(function(saved){
+      storedOrder=!!saved;
+      if(saved){var dbLines=saved.details.items.map(function(i){return '- '+i.name+' ('+i.sku+') × '+i.qty+' = '+i.total+' EGP';});message=message.replace(lines.join('\n'),dbLines.join('\n')).replace('الإجمالي: '+cartTotal()+' EGP','الإجمالي: '+saved.total+' EGP');payload.message=message;}
+      return fetch("https://api.web3forms.com/submit", {
       method: "POST",
       headers: { "Content-Type": "application/json", "Accept": "application/json" },
       body: JSON.stringify(payload)
+    });
     })
     .then(function (r) { return r.json(); })
     .then(function (res) {
@@ -598,6 +605,7 @@
       }
     })
     .catch(function () {
+      if(storedOrder){sessionStorage.setItem("dellmar_last_order",JSON.stringify({number:orderNo,message:message}));saveCart({});location.hash="#/done/"+orderNo;flashToast("طلبك محفوظ في حسابك. أكدّه على واتساب لأن إشعار البريد تعذر إرساله.");return;}
       btn.disabled = false; btn.textContent = "تأكيد الطلب — الدفع عند الاستلام";
       flashToast("حصلت مشكلة في الإرسال — اتصل بينا على " + CONFIG.phone);
     });
@@ -615,6 +623,8 @@
     var parts = hash.split("/").filter(Boolean);
     var html;
     if (!parts.length) html = viewHome();
+    else if (parts[0] === "signup") html = window.DellmarAccount.signup();
+    else if (parts[0] === "orders") html = window.DellmarAccount.orders();
     else if (parts[0] === "login" || parts[0] === "admin") html = window.DellmarAccount.view();
     else if (parts[0] === "categories") html = viewCategories();
     else if (parts[0] === "cat") html = viewCategory(parts[1], query.sub);
@@ -630,7 +640,7 @@
     window.scrollTo({top:0,left:0,behavior:"instant"});
 
     // تفعيل التبويب الحالي في الشريط السفلي
-    var nav = !parts.length ? "home" : (parts[0] === "cart" || parts[0] === "checkout") ? "cart" : (parts[0] === "cat" || parts[0] === "categories") ? "cats" : "";
+    var nav = ["login","signup","orders","admin"].indexOf(parts[0])!==-1 ? "account" : !parts.length ? "home" : (parts[0] === "cart" || parts[0] === "checkout") ? "cart" : (parts[0] === "cat" || parts[0] === "categories") ? "cats" : "";
     document.querySelectorAll(".tabbar a").forEach(function (a) {
       a.classList.toggle("on", a.getAttribute("data-nav") === nav);
     });
