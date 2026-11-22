@@ -183,8 +183,8 @@ input, select, textarea { font-family: inherit; font-size: 1rem; }
 .cat-card-body {
   position: absolute; inset-inline: 0; bottom: 0;
   padding: 26px 14px 12px;
-  background: linear-gradient(to top, rgba(12,16,38,.82), rgba(12,16,38,.35) 55%, transparent);
-  color: #fff;
+  background: linear-gradient(to top, rgba(247,242,231,.97), rgba(247,242,231,.75) 60%, transparent);
+  color: var(--navy);
 }
 .cat-card-body strong { display: block; font-size: 1rem; font-weight: 800; }
 .cat-card-body span { font-size: .74rem; opacity: .85; }
