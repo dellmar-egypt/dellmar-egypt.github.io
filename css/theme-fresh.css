@@ -1,0 +1,48 @@
+/* الاتجاه الثالث: «النمو» — أبيض منعش بأخضر حيوي
+   طابع عصري نظيف: مساحات بيضاء، حواف عريضة، أخضر نابض، خط طجاوة */
+:root {
+  --font-body: 'Tajawal', 'Cairo', sans-serif;
+  --font-display: 'Tajawal', 'Cairo', sans-serif;
+
+  --radius-m: 20px;
+  --radius-l: 28px;
+
+  --bg: #FFFFFF;
+  --ink: #17301C;
+  --heading: #14421F;
+  --line: rgba(20, 66, 31, .10);
+
+  --header-bg: #FFFFFF;
+  --header-ink: #14421F;
+  --header-chip-bg: #EAF5EC;
+  --header-chip-ink: #1C6B31;
+  --header-shadow: 0 1px 0 rgba(20,66,31,.08);
+
+  --hero-bg: linear-gradient(160deg, #EAF7EC 0%, #DDF0E2 45%, #C9E8D6 100%);
+  --hero-ink: #14421F;
+  --hero-accent: #1C8A3C;
+  --hero-chip-bg: rgba(28,138,60,.12);
+  --hero-chip-ink: #1C6B31;
+
+  --accent: #1C8A3C;
+  --accent-ink: #FFFFFF;
+  --price: #1C8A3C;
+
+  --btn-bg: #1C8A3C; --btn-ink: #FFFFFF;
+  --btn-shadow: 0 8px 20px rgba(28,138,60,.28);
+  --btn-ghost-bg: #FFFFFF; --btn-ghost-ink: #1C6B31; --btn-ghost-border: #BFE0C8;
+
+  --card-bg: #FFFFFF; --card-ink: #17301C; --card-border: 1px solid #E4EFE6;
+  --shadow-card: 0 1px 3px rgba(20,66,31,.06), 0 10px 26px rgba(20,66,31,.08);
+  --thumb-bg: #F0F7F1;
+  --chip-bg: #EAF5EC; --chip-ink: #1C6B31;
+  --chip-on-bg: #1C8A3C; --chip-on-ink: #fff;
+  --input-bg: #F6FAF7; --input-border: #CFE6D5; --focus-ring: rgba(28,138,60,.16);
+
+  --soon-bg: #FFF3D6; --soon-ink: #8A6410;
+  --cod-bg: #EAF5EC; --cod-ink: #1C6B31;
+  --done-bg: #1C8A3C; --done-ink: #fff;
+
+  --tabbar-bg: #FFFFFF; --tabbar-ink: #4B6350; --tabbar-on: #1C8A3C;
+  --footer-bg: #14421F; --footer-ink: #D9EBDD;
+}

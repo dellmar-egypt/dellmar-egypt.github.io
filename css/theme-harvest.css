@@ -1,0 +1,39 @@
+/* الاتجاه الأول: «الحصاد» — صباح الحقل الدافئ
+   خلفية رملية كريمية، ترويسة كحلية، أخضر نباتي، لمسات ذهبية قمح */
+:root {
+  --bg: #F7F2E7;
+  --ink: #1E2430;
+  --heading: #191F45;
+  --line: rgba(25, 31, 69, .10);
+
+  --header-bg: #191F45;
+  --header-ink: #F5EFE2;
+  --header-chip-bg: rgba(255,255,255,.14);
+  --header-chip-ink: #F5EFE2;
+
+  --hero-bg: linear-gradient(180deg, #FDF3DC 0%, #F3EAD2 40%, #DCE7C8 100%);
+  --hero-ink: #191F45;
+  --hero-accent: #2E7D32;
+  --hero-chip-bg: rgba(46, 125, 50, .12);
+  --hero-chip-ink: #2E5E2E;
+
+  --accent: #C9962B;
+  --accent-ink: #191F45;
+  --price: #B0741A;
+
+  --btn-bg: #2E7D32; --btn-ink: #FFFFFF;
+  --btn-ghost-bg: transparent; --btn-ghost-ink: #191F45; --btn-ghost-border: rgba(25,31,69,.35);
+
+  --card-bg: #FFFFFF; --card-ink: #1E2430; --card-border: 1px solid rgba(25,31,69,.06);
+  --thumb-bg: #F1EBDC;
+  --chip-bg: #EFE8D5; --chip-ink: #4A4A38;
+  --chip-on-bg: #2E7D32; --chip-on-ink: #fff;
+  --input-bg: #FFFDF7; --input-border: rgba(25,31,69,.16); --focus-ring: rgba(201,150,43,.18);
+
+  --soon-bg: #C9962B; --soon-ink: #191F45;
+  --cod-bg: #E9F2E2; --cod-ink: #2E5E2E;
+  --done-bg: #2E7D32; --done-ink: #fff;
+
+  --tabbar-bg: #FFFFFF; --tabbar-ink: #191F45; --tabbar-on: #2E7D32;
+  --footer-bg: #191F45; --footer-ink: #EDE6D4;
+}
