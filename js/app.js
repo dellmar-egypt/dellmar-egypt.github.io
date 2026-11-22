@@ -181,6 +181,13 @@
         '<span class="doctor-banner-arrow">‹</span>' +
       '</a>' +
     '</section>' +
+    '<section class="section">' +
+      '<div class="about-strip">' +
+        '<img src="images/logo.png" alt="ديلمار ايجيبت">' +
+        '<div><strong>ديلمار ايجيبت — استيراد وتصدير وتنمية زراعية</strong>' +
+        '<p>منتجات أصلية، أسعار عادلة، توصيل لكل المحافظات، والدفع عند الاستلام. <a href="#/about">اعرف أكتر عننا ‹</a></p></div>' +
+      '</div>' +
+    '</section>' +
     '<section class="section" id="cats">' +
       '<div class="section-head">' +
         '<h2 class="section-title">تصفح حسب الفئة</h2>' +
@@ -340,6 +347,36 @@
     '</div>';
   }
 
+  /* ---------- من نحن ---------- */
+  function viewAbout() {
+    return '' +
+    '<div class="cart-wrap">' +
+      '<div class="section-head"><h2 class="section-title">من نحن</h2>' +
+      '<p class="section-sub">شركة ديلمار ايجيبت للاستيراد والتصدير والتنمية الزراعية</p>' +
+      '<div class="section-ornament"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg></div></div>' +
+      '<div class="form-card about-card">' +
+        '<img class="about-logo" src="images/logo.png" alt="شعار ديلمار ايجيبت">' +
+        '<p class="about-lead">ديلمار ايجيبت شركة مصرية متخصصة في استيراد وتوريد الأسمدة والمبيدات ومستلزمات الإنتاج الزراعي — من السماد الورقي للسماد الأرضي، ومن المبيد الحشري للفطري ومبيدات النماتودا. شغلنا كله إن الفلاح المصري ياخد منتج أصلي يستاهل تعبه وأرضه.</p>' +
+        '<h3 class="about-h">رسالتنا</h3>' +
+        '<p>إننا نوصّل للمزارع منتج مضمون بسعر عادل، من غير وسطاء يكلفوه ولا منتجات مغشوشة تضيّع موسمه. المحصول الوفير يبدأ من مدخلات سليمة — وده اللي بنستورده ونوفره.</p>' +
+        '<h3 class="about-h">وعدنا ليك</h3>' +
+        '<ul class="about-list">' +
+          '<li><b>منتجات أصلية 100%:</b> كل صنف في المتجر بنختاره ونعتمده قبل ما نعرضه.</li>' +
+          '<li><b>أسعار عادلة:</b> تسعير واضح بالجنيه، من غير مفاجآت.</li>' +
+          '<li><b>توصيل لجميع المحافظات:</b> طلبك يوصل لحد باب المزرعة أو المخزن.</li>' +
+          '<li><b>الدفع عند الاستلام:</b> تشوف طلبك الأول وبعدين تدفع.</li>' +
+          '<li><b>تشخيص مجاني لنباتك:</b> صوّر الورقة أو الثمرة وابعتها، ومهندسينا يردوا عليك بالتشخيص والعلاج المناسب من منتجاتنا.</li>' +
+        '</ul>' +
+        '<h3 class="about-h">كلمنا في أي وقت</h3>' +
+        '<p>مكالمة أو واتساب: <a href="tel:01122208509" dir="ltr"><b>01122208509</b></a> — فريق ديلمار تحت أمرك من الشروقية للغروب.</p>' +
+        '<div class="about-ctas">' +
+          '<a class="btn" href="#/">تصفح المنتجات</a>' +
+          '<a class="btn btn-wa" href="https://wa.me/201122208509" target="_blank" rel="noopener">كلمنا واتساب 💬</a>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }
+
   /* ---------- إتمام الطلب ---------- */
   var GOVS = ["القاهرة","الجيزة","الإسكندرية","القليوبية","الدقهلية","الشرقية","الغربية","المنوفية","البحيرة","كفر الشيخ","دمياط","بورسعيد","الإسماعيلية","السويس","الفيوم","بني سويف","المنيا","أسيوط","سوهاج","قنا","الأقصر","أسوان","البحر الأحمر","الوادي الجديد","مطروح","شمال سيناء","جنوب سيناء"];
 
@@ -455,6 +492,7 @@
     else if (parts[0] === "cat") html = viewCategory(parts[1], query.sub);
     else if (parts[0] === "product") html = viewProduct(parts[1]);
     else if (parts[0] === "doctor") html = viewDoctor();
+    else if (parts[0] === "about") html = viewAbout();
     else if (parts[0] === "cart") html = viewCart();
     else if (parts[0] === "checkout") html = viewCheckout();
     else if (parts[0] === "done") html = viewDone(parts[1] || "");
