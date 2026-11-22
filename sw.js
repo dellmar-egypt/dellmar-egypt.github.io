@@ -1,5 +1,5 @@
 /* عامل خدمة ديلمار ايجيبت — يجعل المتجر يعمل كتطبيق ويفتح دون إنترنت */
-var CACHE = "dellmar-v22";
+var CACHE = "dellmar-v23";
 var ASSETS = [
   "./",
   "./index.html",
@@ -25,6 +25,8 @@ self.addEventListener("install", function (e) {
   e.waitUntil(caches.open(CACHE).then(function (c) { return c.addAll(ASSETS); }));
   self.skipWaiting();
 });
+
+self.addEventListener("message", function (e) { if (e.data && e.data.type === "SKIP_WAITING") self.skipWaiting(); });
 
 self.addEventListener("activate", function (e) {
   e.waitUntil(

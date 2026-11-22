@@ -11,6 +11,7 @@
   var ua = navigator.userAgent || '';
   var isIOS = /iphone|ipad|ipod/i.test(ua) || (/Macintosh/i.test(ua) && navigator.maxTouchPoints > 1);
   var isAndroid = /android/i.test(ua);
+  var inApp = /; wv\)|FBAN|FBAV|Instagram|WhatsApp|Line\/|Snapchat|TikTok/i.test(ua);
   function flag() { try { localStorage.setItem(KEY, '1'); } catch (e) {} }
   function flagged() { try { return localStorage.getItem(KEY) === '1'; } catch (e) { return false; } }
   function runningInstalled() {
@@ -30,6 +31,8 @@
   function help() {
     if (isIOS) {
       steps.textContent = 'افتح الموقع في Safari، واضغط زر المشاركة، ثم «إضافة إلى الشاشة الرئيسية»، وبعدها «إضافة».';
+    } else if (isAndroid && inApp) {
+      steps.textContent = 'أنت فاتح الموقع من داخل تطبيق تاني (زي واتساب)، والتنزيل مش بيشتغل من هنا. اضغط ⋮ واختار «فتح في Chrome»، وبعدها دوس «نزّل التطبيق». أو انسخ الرابط وافتحه في Chrome. تقدر تحمّل الملف مباشرة من هنا: ' + APK;
     } else if (isAndroid) {
       steps.textContent = 'افتح الموقع في Chrome نفسه، مش داخل واتساب أو فيسبوك. من قائمة Chrome (⋮) اختار «تثبيت التطبيق» أو «إضافة إلى الشاشة الرئيسية».';
     } else {
@@ -38,9 +41,8 @@
     if (!dialog.open) dialog.showModal();
   }
   function downloadApk() {
-    var a = document.createElement('a');
-    a.href = APK; a.setAttribute('download', 'Dellmar.apk'); a.rel = 'noopener';
-    document.body.appendChild(a); a.click(); a.remove();
+    if (inApp) { help(); return; }
+    window.location.href = APK;
   }
   async function install() {
     if (deferred) {

@@ -756,11 +756,44 @@
   /* ---------- تسجيل عامل الخدمة (PWA) ---------- */
   if ("serviceWorker" in navigator && location.protocol.indexOf("http") === 0) {
     var hadWorker = !!navigator.serviceWorker.controller;
+    var banner = document.getElementById('update-ready');
+    var swReg = null, reloading = false;
+    function showUpdate() { banner.hidden = false; }
     navigator.serviceWorker.addEventListener('controllerchange', function () {
-      if (hadWorker) document.getElementById('update-ready').hidden = false;
+      if (hadWorker) showUpdate();
       hadWorker = true;
     });
-    document.getElementById('update-reload').onclick = function () { location.reload(); };
-    navigator.serviceWorker.register("sw.js", {updateViaCache:'none'}).then(function(reg){return reg.update();}).catch(function () {});
+    function watch(reg) {
+      swReg = reg;
+      if (reg.waiting && navigator.serviceWorker.controller) showUpdate();
+      reg.addEventListener('updatefound', function () {
+        var w = reg.installing;
+        if (!w) return;
+        w.addEventListener('statechange', function () {
+          if (w.state === 'installed' && navigator.serviceWorker.controller) showUpdate();
+        });
+      });
+    }
+    function hardReload() {
+      if (reloading) return; reloading = true;
+      var u = new URL(location.href);
+      u.searchParams.set('r', Date.now().toString(36));
+      location.replace(u.toString());
+    }
+    document.getElementById('update-reload').onclick = function () {
+      var btn = this; btn.disabled = true; btn.textContent = 'جاري التحديث…';
+      var done = function () { hardReload(); };
+      var work = Promise.resolve();
+      if (swReg) {
+        work = swReg.update().catch(function () {}).then(function () {
+          if (swReg.waiting) swReg.waiting.postMessage({ type: 'SKIP_WAITING' });
+        });
+      }
+      work.then(function () { return window.caches ? caches.keys().then(function (ks) { return Promise.all(ks.map(function (k) { return caches.delete(k); })); }) : null; })
+        .catch(function () {}).then(function () { setTimeout(done, 300); });
+      setTimeout(done, 4000);
+    };
+    navigator.serviceWorker.register("sw.js", {updateViaCache:'none'}).then(function(reg){ watch(reg); return reg.update(); }).catch(function () {});
+    document.addEventListener('visibilitychange', function () { if (!document.hidden && swReg) swReg.update().catch(function () {}); });
   }
 })();
