@@ -1,5 +1,5 @@
 /* عامل خدمة ديلمار ايجيبت — يجعل المتجر يعمل كتطبيق ويفتح دون إنترنت */
-var CACHE = "dellmar-v9";
+var CACHE = "dellmar-v10";
 var ASSETS = [
   "./",
   "./index.html",
