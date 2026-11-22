@@ -757,9 +757,20 @@
   if ("serviceWorker" in navigator && location.protocol.indexOf("http") === 0) {
     var hadWorker = !!navigator.serviceWorker.controller;
     var banner = document.getElementById('update-ready');
-    var swReg = null, reloading = false;
+    var swReg = null, reloading = false, wantReload = false;
     function showUpdate() { banner.hidden = false; }
+    function clearCaches() {
+      if (!window.caches) return Promise.resolve();
+      return caches.keys().then(function (ks) { return Promise.all(ks.map(function (k) { return caches.delete(k); })); });
+    }
+    function hardReload() {
+      if (reloading) return; reloading = true;
+      var u = new URL(location.href);
+      u.searchParams.set('r', Date.now().toString(36));
+      location.replace(u.toString());
+    }
     navigator.serviceWorker.addEventListener('controllerchange', function () {
+      if (wantReload) { clearCaches().catch(function () {}).then(function () { setTimeout(hardReload, 300); }); return; }
       if (hadWorker) showUpdate();
       hadWorker = true;
     });
@@ -770,28 +781,26 @@
         var w = reg.installing;
         if (!w) return;
         w.addEventListener('statechange', function () {
-          if (w.state === 'installed' && navigator.serviceWorker.controller) showUpdate();
+          if (w.state === 'installed' && navigator.serviceWorker.controller) {
+            if (wantReload) { clearCaches().catch(function () {}).then(function () { setTimeout(hardReload, 300); }); }
+            else showUpdate();
+          }
         });
       });
     }
-    function hardReload() {
-      if (reloading) return; reloading = true;
-      var u = new URL(location.href);
-      u.searchParams.set('r', Date.now().toString(36));
-      location.replace(u.toString());
-    }
     document.getElementById('update-reload').onclick = function () {
       var btn = this; btn.disabled = true; btn.textContent = 'جاري التحديث…';
-      var done = function () { hardReload(); };
+      wantReload = true;
+      if (swReg && swReg.waiting) swReg.waiting.postMessage({ type: 'SKIP_WAITING' });
       var work = Promise.resolve();
       if (swReg) {
         work = swReg.update().catch(function () {}).then(function () {
           if (swReg.waiting) swReg.waiting.postMessage({ type: 'SKIP_WAITING' });
+          if (swReg.installing) return new Promise(function () {});
         });
       }
-      work.then(function () { return window.caches ? caches.keys().then(function (ks) { return Promise.all(ks.map(function (k) { return caches.delete(k); })); }) : null; })
-        .catch(function () {}).then(function () { setTimeout(done, 300); });
-      setTimeout(done, 4000);
+      work.then(clearCaches).catch(function () {}).then(function () { setTimeout(hardReload, 600); });
+      setTimeout(hardReload, 5000);
     };
     navigator.serviceWorker.register("sw.js", {updateViaCache:'none'}).then(function(reg){ watch(reg); return reg.update(); }).catch(function () {});
     document.addEventListener('visibilitychange', function () { if (!document.hidden && swReg) swReg.update().catch(function () {}); });

@@ -523,9 +523,9 @@ input, select, textarea { font-family: inherit; font-size: 1rem; }
 .account-profile dd{margin:4px 0 0;font-weight:700;text-align:start;overflow-wrap:anywhere}
 .account-profile .btn{margin-bottom:10px}
 
-.footer-visits{margin:16px 0;font-size:.95rem}
-.footer-visits strong{display:inline-block;min-width:2ch;font-size:1.3rem;color:#e0bd69}
-.footer-visits small{display:block;font-size:.72rem;opacity:.8;margin-top:4px}
+.visit-badge{margin:22px auto 6px;width:104px;height:104px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:radial-gradient(circle at 50% 30%,rgba(224,189,105,.18),rgba(224,189,105,.04) 72%);border:2px solid var(--accent);box-shadow:0 0 0 6px rgba(201,150,43,.14),0 10px 24px rgba(0,0,0,.35)}
+.visit-badge-num{display:block;font-size:1.5rem;font-weight:900;color:#e0bd69;line-height:1.1;min-width:2ch}
+.visit-badge-label{display:block;font-size:.78rem;font-weight:700;opacity:.85}
 .customer-row{display:flex;flex-direction:column;gap:6px;padding:14px 0;border-bottom:1px solid var(--line);overflow-wrap:anywhere}
 .customer-row span{text-align:right}
 .customer-row small{color:var(--ink-2)}

@@ -1,4 +1,4 @@
-/* Install strip: hidden once installed; tap installs (PWA prompt, else APK on Android, else steps). */
+/* Install strip: visible unless the app is truly running installed; tap uses the PWA prompt when available, else always opens the help dialog with APK link and steps. */
 (function () {
   var APK = 'https://github.com/dellmar-egypt/dellmar-egypt.github.io/releases/download/android-v1.0.0/Dellmar.apk';
   var KEY = 'dellmar-installed';
@@ -7,13 +7,14 @@
   var button = document.getElementById('install-go');
   var dialog = document.getElementById('install-help');
   var steps = document.getElementById('install-steps');
+  var apkBtn = document.getElementById('install-apk');
   var close = document.getElementById('install-close');
   var ua = navigator.userAgent || '';
   var isIOS = /iphone|ipad|ipod/i.test(ua) || (/Macintosh/i.test(ua) && navigator.maxTouchPoints > 1);
   var isAndroid = /android/i.test(ua);
   var inApp = /; wv\)|FBAN|FBAV|Instagram|WhatsApp|Line\/|Snapchat|TikTok/i.test(ua);
   function flag() { try { localStorage.setItem(KEY, '1'); } catch (e) {} }
-  function flagged() { try { return localStorage.getItem(KEY) === '1'; } catch (e) { return false; } }
+  function unflag() { try { localStorage.removeItem(KEY); } catch (e) {} }
   function runningInstalled() {
     try {
       if (window.matchMedia('(display-mode: standalone)').matches) return true;
@@ -25,24 +26,22 @@
     return false;
   }
   function sync() {
-    if (runningInstalled()) flag();
-    entry.hidden = runningInstalled() || flagged();
+    var installed = runningInstalled();
+    if (installed) flag(); else unflag();
+    entry.hidden = installed;
   }
   function help() {
+    apkBtn.hidden = isIOS;
     if (isIOS) {
       steps.textContent = 'افتح الموقع في Safari، واضغط زر المشاركة، ثم «إضافة إلى الشاشة الرئيسية»، وبعدها «إضافة».';
     } else if (isAndroid && inApp) {
-      steps.textContent = 'أنت فاتح الموقع من داخل تطبيق تاني (زي واتساب)، والتنزيل مش بيشتغل من هنا. اضغط ⋮ واختار «فتح في Chrome»، وبعدها دوس «نزّل التطبيق». أو انسخ الرابط وافتحه في Chrome. تقدر تحمّل الملف مباشرة من هنا: ' + APK;
+      steps.textContent = 'أنت فاتح الموقع من داخل تطبيق تاني (زي واتساب)، والتثبيت من المتصفح مش بيشتغل من هنا. الأسهل: اضغط ⋮ من فوق واختار «فتح في Chrome» وبعدها دوس «نزّل التطبيق». أو حمّل ملف التطبيق مباشرة من الزرار اللي تحت.';
     } else if (isAndroid) {
-      steps.textContent = 'افتح الموقع في Chrome نفسه، مش داخل واتساب أو فيسبوك. من قائمة Chrome (⋮) اختار «تثبيت التطبيق» أو «إضافة إلى الشاشة الرئيسية».';
+      steps.textContent = 'من قائمة Chrome (⋮) اختار «تثبيت التطبيق» أو «إضافة إلى الشاشة الرئيسية». ولو الاختيار مش ظاهر، حمّل ملف التطبيق مباشرة من الزرار اللي تحت.';
     } else {
-      steps.textContent = 'من قائمة المتصفح اختار «تثبيت ديلمار». على الكمبيوتر ممكن تلاقي علامة التثبيت جنب شريط العنوان. لو الاختيار مش موجود، جرّب Chrome أو Edge محدّث. على أندرويد ممكن تحمّل التطبيق من هنا: ' + APK;
+      steps.textContent = 'من قائمة المتصفح اختار «تثبيت ديلمار»، وعلى الكمبيوتر ممكن تلاقي علامة التثبيت جنب شريط العنوان. ولو عندك أندرويد، تقدر تحمّل ملف التطبيق مباشرة من الزرار اللي تحت.';
     }
     if (!dialog.open) dialog.showModal();
-  }
-  function downloadApk() {
-    if (inApp) { help(); return; }
-    window.location.href = APK;
   }
   async function install() {
     if (deferred) {
@@ -53,12 +52,10 @@
         await prompt.prompt();
         var choice = await prompt.userChoice;
         if (choice.outcome === 'accepted') { flag(); sync(); }
-      } catch (e) { if (isAndroid) downloadApk(); else help(); }
+      } catch (e) { help(); }
       finally { button.disabled = false; }
       return;
     }
-    if (isIOS) { help(); return; }
-    if (isAndroid) { downloadApk(); return; }
     help();
   }
   button.addEventListener('click', install);
