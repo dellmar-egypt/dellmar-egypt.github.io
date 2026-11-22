@@ -323,7 +323,7 @@
             '<b>صوّر النبات المصاب</b>' +
             '<p class="step-sub">ورقة أو ثمرة في ضوء النهار — الصورة تكون واضحة وقريبة</p>' +
             '<label class="photo-pick" id="d-pick" for="d-photo">📷 اختر أو صوّر صورة</label>' +
-            '<input type="file" id="d-photo" accept="image/*" class="vh-input" tabindex="-1" aria-hidden="true">' +
+            '<input type="file" id="d-photo" accept="image/*" class="vh-input" aria-label="صورة النبات">' +
             '<div class="photo-preview" id="d-preview" hidden>' +
               '<img id="d-preview-img" alt="صورة النبات المصاب">' +
               '<button type="button" class="photo-clear" id="d-clear">✕ تغيير الصورة</button>' +
@@ -610,6 +610,7 @@
     var parts = hash.split("/").filter(Boolean);
     var html;
     if (!parts.length) html = viewHome();
+    else if (parts[0] === "login" || parts[0] === "admin") html = window.DellmarAccount.view();
     else if (parts[0] === "categories") html = viewCategories();
     else if (parts[0] === "cat") html = viewCategory(parts[1], query.sub);
     else if (parts[0] === "product") html = viewProduct(parts[1]);
@@ -706,6 +707,8 @@
 
   /* ---------- تشغيل ---------- */
   window.addEventListener("hashchange", route);
+  window.addEventListener("dellmar:products", function () { PRODUCTS = window.DELLMAR.products; CATEGORIES.forEach(function(c){ c.count=PRODUCTS.filter(function(p){return p.cat_id===c.id;}).length; }); if(!document.getElementById("d-photo") && !document.getElementById("admin-product")) route(); });
+  if(window.DellmarAccount) window.DellmarAccount.refresh().catch(function(){});
   updateCartBadge();
   route();
 
