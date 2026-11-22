@@ -626,7 +626,7 @@
     else html = viewHome();
 
     app.innerHTML = html;
-    window.scrollTo(0, 0);
+    window.scrollTo({top:0,left:0,behavior:"instant"});
 
     // تفعيل التبويب الحالي في الشريط السفلي
     var nav = !parts.length ? "home" : (parts[0] === "cart" || parts[0] === "checkout") ? "cart" : (parts[0] === "cat" || parts[0] === "categories") ? "cats" : "";
