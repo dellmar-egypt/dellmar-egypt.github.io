@@ -167,8 +167,8 @@
       heroScene() +
       '<div class="hero-content">' +
         '<span class="hero-kicker">🌾 شركة ديلمار ايجيبت للتنمية الزراعية</span>' +
-        '<h1 class="hero-title">من أرضنا الطيبة… <em>محصول أوفى</em></h1>' +
-        '<p class="hero-sub">أسمدة ومبيدات ومستلزمات زراعية موثوقة، توصل لحد باب مزرعتك — والدفع عند الاستلام.</p>' +
+        '<h1 class="hero-title">'+esc((window.DELLMAR_CONTENT||{}).hero||'من أرضنا الطيبة… محصول أوفى')+'</h1>' +
+        '<p class="hero-sub">'+esc((window.DELLMAR_CONTENT||{}).intro||'أسمدة ومبيدات ومستلزمات زراعية موثوقة، توصل لحد باب مزرعتك — والدفع عند الاستلام.')+'</p>' +
         '<div class="hero-ctas">' +
           '<a class="btn" href="#cats">تصفح المنتجات</a>' +
           '<a class="btn btn-ghost" href="tel:' + CONFIG.phone + '" dir="ltr">☎ ' + CONFIG.phone + '</a>' +
@@ -466,6 +466,7 @@
 
   /* ---------- من نحن ---------- */
   function viewAbout() {
+    if((window.DELLMAR_CONTENT||{}).about) return '<section class="section"><h1>عن الشركة</h1><div class="form-card" style="white-space:pre-line">'+esc(window.DELLMAR_CONTENT.about)+'</div></section>';
     return '' +
     '<div class="cart-wrap">' +
       '<div class="section-head"><h2 class="section-title">من نحن</h2>' +
@@ -726,6 +727,7 @@
 
   /* ---------- تشغيل ---------- */
   window.addEventListener("hashchange", route);
+  window.addEventListener("dellmar:content", function(){var c=window.DELLMAR_CONTENT||{};if(c.company){document.querySelector('.footer-company').textContent=c.company;}if(location.hash===''||location.hash==='#/'||location.hash==='#/about')route();});
   window.addEventListener("dellmar:products", function () { PRODUCTS = window.DELLMAR.products; CATEGORIES.forEach(function(c){ c.count=PRODUCTS.filter(function(p){return p.cat_id===c.id;}).length; }); if(!document.getElementById("d-photo") && !document.getElementById("admin-product")) route(); });
   if(window.DellmarAccount) window.DellmarAccount.refresh().catch(function(){});
   updateCartBadge();
