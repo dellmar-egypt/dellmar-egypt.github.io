@@ -52,7 +52,7 @@
     if (!dialog.open) dialog.showModal();
   }
   async function install() {
-    if (isAndroid) { downloadApk(); return; }
+    if (isAndroid) { if (inApp) { help(); return; } downloadApk(); return; }
     if (deferred) {
       var prompt = deferred;
       deferred = null;
