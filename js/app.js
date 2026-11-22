@@ -307,8 +307,8 @@
   function viewDoctor() {
     return '' +
     '<div class="cart-wrap">' +
-      '<div class="section-head"><h2 class="section-title">شخّص نباتك مجاناً</h2>' +
-      '<p class="section-sub">خدمة من مهندسي ديلمار ايجيبت — التشخيص والعلاج المناسب من منتجات ديلمار</p>' +
+      '<div class="section-head"><h2 class="section-title">شخّص نباتك بالذكاء الاصطناعي 🌿</h2>' +
+      '<p class="section-sub">صوّر الورقة أو الثمرة المصابة والتشخيص يظهر لك هنا فوراً — خدمة مجانية من ديلمار ايجيبت</p>' +
       '<div class="section-ornament"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg></div></div>' +
       '<div class="form-card">' +
         '<div class="diag-step">' +
@@ -317,7 +317,7 @@
             '<b>صوّر النبات المصاب</b>' +
             '<p class="step-sub">ورقة أو ثمرة في ضوء النهار — الصورة تكون واضحة وقريبة</p>' +
             '<label class="photo-pick" id="d-pick" for="d-photo">📷 اختر أو صوّر صورة</label>' +
-            '<input type="file" id="d-photo" accept="image/*" capture="environment" hidden>' +
+            '<input type="file" id="d-photo" accept="image/*" class="vh-input" tabindex="-1" aria-hidden="true">' +
             '<div class="photo-preview" id="d-preview" hidden>' +
               '<img id="d-preview-img" alt="صورة النبات المصاب">' +
               '<button type="button" class="photo-clear" id="d-clear">✕ تغيير الصورة</button>' +
@@ -327,24 +327,110 @@
         '<div class="diag-step">' +
           '<span class="step-num">2</span>' +
           '<div style="flex:1">' +
-            '<b>حدّد المحصول والأعراض</b>' +
-            '<div class="field" style="margin-top:10px"><label for="d-crop">نوع المحصول</label><select id="d-crop">' +
-              ['طماطم','بطاطس','بصل','قمح','ذرة','أرز','قطن','قصب سكر','عنب','مانجو','موالح','خيار','فلفل','فراولة','أخرى'].map(function(c){return '<option>'+c+'</option>';}).join('') +
+            '<b>حدّد المحصول (اختياري)</b>' +
+            '<div class="field" style="margin:10px 0 0"><select id="d-crop">' +
+              ['اختار المحصول…','طماطم','بطاطس','بصل','قمح','ذرة','أرز','قطن','قصب سكر','عنب','مانجو','موالح','خيار','فلفل','فراولة','أخرى'].map(function(c){return '<option>'+c+'</option>';}).join('') +
             '</select></div>' +
-            '<div class="field" style="margin-bottom:0"><label for="d-sym">وصف الأعراض</label><textarea id="d-sym" placeholder="مثال: بقع بنية على الأوراق السفلية وذبول في القمة النامية…"></textarea></div>' +
           '</div>' +
         '</div>' +
         '<div class="diag-step">' +
           '<span class="step-num">3</span>' +
           '<div style="flex:1">' +
-            '<b>ابعت الطلب على واتساب</b>' +
-            '<p class="step-sub">الزرار هيفتح واتساب برسالة جاهزة فيها المحصول والأعراض. <b>مهم:</b> جوه واتساب اضغط على المشبك 📎 أو الكاميرا وأرفق الصورة اللي اخترتها قبل الإرسال — المتصفح مش بيقدر يبعت الصورة أوتوماتيك.</p>' +
-            '<button class="btn btn-block btn-wa" id="d-send">إرسال طلب التشخيص عبر واتساب 💬</button>' +
+            '<b>اضغط تشخيص</b>' +
+            '<p class="step-sub">الذكاء الاصطناعي يحلل الصورة ويديك النتيجة والعلاج المقترح في ثوانٍ</p>' +
+            '<button class="btn btn-block" id="d-diagnose" disabled>🔍 شخّص النبات</button>' +
           '</div>' +
         '</div>' +
-        '<p class="form-note">أو اتصل بينا مباشرة: <a href="tel:01122208509" dir="ltr"><b>01122208509</b></a></p>' +
+        '<div id="d-result"></div>' +
+        '<p class="form-note">التشخيص استرشادي. لاستشارة مهندس: <a href="tel:01122208509" dir="ltr"><b>01122208509</b></a></p>' +
       '</div>' +
     '</div>';
+  }
+
+  /* ---------- التشخيص بالذكاء الاصطناعي ---------- */
+  function arNorm(s) {
+    return (s || "").replace(/[أإآ]/g, "ا").replace(/ة/g, "ه").replace(/ى/g, "ي").replace(/[ً-ْ]/g, "").toLowerCase();
+  }
+  function matchProducts(names) {
+    var want = (names || []).map(arNorm).filter(Boolean);
+    if (!want.length) return [];
+    return PRODUCTS.filter(function (p) { return !p.soon; }).map(function (p) {
+      var hay = arNorm(p.name + " " + (p.ingredient || "") + " " + (p.desc || "") + " " + (p.category || ""));
+      var score = 0;
+      want.forEach(function (w) {
+        w.split(/\s+/).forEach(function (tok) {
+          if (tok.length > 2 && hay.indexOf(tok) !== -1) score += tok.length > 5 ? 2 : 1;
+        });
+      });
+      return { p: p, score: score };
+    }).filter(function (x) { return x.score >= 3; }).sort(function (a, b) { return b.score - a.score; }).slice(0, 4).map(function (x) { return x.p; });
+  }
+  function readImageDataURL(file, cb) {
+    var img = new Image();
+    var url = URL.createObjectURL(file);
+    img.onload = function () {
+      var max = 1024, w = img.naturalWidth, h = img.naturalHeight;
+      var s = Math.min(1, max / Math.max(w, h));
+      var cv = document.createElement("canvas");
+      cv.width = Math.round(w * s); cv.height = Math.round(h * s);
+      cv.getContext("2d").drawImage(img, 0, 0, cv.width, cv.height);
+      URL.revokeObjectURL(url);
+      cb(cv.toDataURL("image/jpeg", 0.82));
+    };
+    img.onerror = function () { URL.revokeObjectURL(url); cb(null); };
+    img.src = url;
+  }
+  function runDiagnose() {
+    var btn = document.getElementById("d-diagnose");
+    var out = document.getElementById("d-result");
+    if (!window.__dPhoto || !btn) return;
+    btn.disabled = true;
+    btn.textContent = "⏳ بيحلل الصورة…";
+    out.innerHTML = '<div class="diag-loading">🌿 الذكاء الاصطناعي بيفحص الصورة — استنى ثواني…</div>';
+    readImageDataURL(window.__dPhoto, function (dataURL) {
+      if (!dataURL) {
+        out.innerHTML = '<div class="diag-error">مش قادرين نقرا الصورة — جرّب صورة تانية.</div>';
+        btn.disabled = false; btn.textContent = "🔍 شخّص النبات";
+        return;
+      }
+      var cropSel = document.getElementById("d-crop");
+      var cropVal = cropSel && cropSel.selectedIndex > 0 ? cropSel.value : "";
+      fetch(CONFIG.diagnoseUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "apikey": CONFIG.supabaseKey, "Authorization": "Bearer " + CONFIG.supabaseKey },
+        body: JSON.stringify({ image: dataURL, crop: cropVal })
+      }).then(function (r) {
+        if (r.status === 503) throw new Error("busy");
+        if (!r.ok) throw new Error("http" + r.status);
+        return r.json();
+      }).then(function (d) {
+        btn.disabled = false; btn.textContent = "🔍 شخّص النبات";
+        if (!d || !d.ok || !d.result) throw new Error("busy");
+        var r = d.result;
+        var adv = (r.advice || []).map(function (a) { return "<li>" + esc(a) + "</li>"; }).join("");
+        var prods = matchProducts(r.products || []);
+        var prodHtml = prods.length ?
+          '<div class="diag-prods"><b>منتجات مقترحة من المتجر:</b><div class="diag-prod-grid">' +
+          prods.map(function (p) {
+            return '<a class="diag-prod" href="#/product/' + p.sku + '"><img src="images/' + p.img + '" alt="' + esc(p.name) + '" loading="lazy"><span>' + esc(p.name) + '</span><b>' + p.price + ' ج</b></a>';
+          }).join("") + '</div></div>' : "";
+        var conf = (typeof r.confidence === "number" && r.confidence > 0) ? '<span class="diag-conf">نسبة الثقة: ' + r.confidence + '٪</span>' : "";
+        out.innerHTML = '<div class="diag-result">' +
+          '<div class="diag-result-head"><span>🩺</span><b>' + esc(r.problem || "تعذر التشخيص") + "</b>" + conf + "</div>" +
+          (r.plant ? '<p class="diag-meta">النبات: ' + esc(r.plant) + (r.status ? " — " + esc(r.status) : "") + "</p>" : "") +
+          (adv ? '<ul class="diag-advice">' + adv + "</ul>" : "") +
+          prodHtml +
+          '<p class="diag-note">لو الأعراض مستمرة كلم مهندسينا على <a href="tel:01122208509" dir="ltr"><b>01122208509</b></a></p>' +
+        "</div>";
+        out.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }).catch(function (err) {
+        btn.disabled = false; btn.textContent = "🔍 شخّص النبات";
+        var msg = err && err.message === "busy"
+          ? "السيرفر مشغول شوية — جرّب تاني بعد دقيقة 🙏"
+          : "حصلت مشكلة في الاتصال — اتأكد من النت وجرّب تاني.";
+        out.innerHTML = '<div class="diag-error">' + msg + "</div>";
+      });
+    });
   }
 
   /* ---------- من نحن ---------- */
@@ -368,7 +454,7 @@
           '<li><b>تشخيص مجاني لنباتك:</b> صوّر الورقة أو الثمرة وابعتها، ومهندسينا يردوا عليك بالتشخيص والعلاج المناسب من منتجاتنا.</li>' +
         '</ul>' +
         '<h3 class="about-h">كلمنا في أي وقت</h3>' +
-        '<p>مكالمة أو واتساب: <a href="tel:01122208509" dir="ltr"><b>01122208509</b></a> — فريق ديلمار تحت أمرك من الشروقية للغروب.</p>' +
+        '<p>مكالمة أو واتساب: <a href="tel:01122208509" dir="ltr"><b>01122208509</b></a> — فريق ديلمار تحت أمرك في أي وقت.</p>' +
         '<div class="about-ctas">' +
           '<a class="btn" href="#/">تصفح المنتجات</a>' +
           '<a class="btn btn-wa" href="https://wa.me/201122208509" target="_blank" rel="noopener">كلمنا واتساب 💬</a>' +
@@ -510,7 +596,7 @@
 
   /* ---------- تفويض النقرات (أزرار السلة والكمية) ---------- */
   document.addEventListener("click", function (e) {
-    var t = e.target.closest("[data-add],[data-add-qty],[data-line],[data-remove],[data-step],#d-send,#d-clear");
+    var t = e.target.closest("[data-add],[data-add-qty],[data-line],[data-remove],[data-step],#d-diagnose,#d-clear");
     if (!t) return;
     if (t.dataset.add) { e.preventDefault(); addToCart(t.dataset.add, 1); }
     else if (t.dataset.addQty) {
@@ -528,21 +614,17 @@
       route();
     }
     else if (t.dataset.remove) { setQty(t.dataset.remove, 0); route(); }
-    else if (t.id === "d-send") {
-      var crop = document.getElementById("d-crop").value;
-      var sym = document.getElementById("d-sym").value.trim() || "—";
-      var hasPhoto = !!window.__dPhoto;
-      var msg = "السلام عليكم 🌿\nطلب تشخيص نبات\nالمحصول: " + crop + "\nالأعراض: " + sym +
-        (hasPhoto ? "\n📷 هرفق صورة النبات في الرسالة دي" : "\n(هبعت صورة النبات في رسالة منفصلة)");
-      window.open("https://wa.me/201122208509?text=" + encodeURIComponent(msg), "_blank", "noopener");
-      flashToast("أرفق الصورة في واتساب قبل الإرسال 📎");
-    }
+    else if (t.id === "d-diagnose") { runDiagnose(); }
     else if (t.id === "d-clear") {
       window.__dPhoto = null;
       var inp = document.getElementById("d-photo");
       if (inp) inp.value = "";
       document.getElementById("d-preview").hidden = true;
       document.getElementById("d-pick").hidden = false;
+      var db = document.getElementById("d-diagnose");
+      if (db) db.disabled = true;
+      var dr = document.getElementById("d-result");
+      if (dr) dr.innerHTML = "";
     }
   });
 
@@ -552,6 +634,8 @@
       document.getElementById("d-preview-img").src = URL.createObjectURL(e.target.files[0]);
       document.getElementById("d-preview").hidden = false;
       document.getElementById("d-pick").hidden = true;
+      var db = document.getElementById("d-diagnose");
+      if (db) db.disabled = false;
     }
   });
 

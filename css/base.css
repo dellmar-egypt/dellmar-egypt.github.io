@@ -475,3 +475,23 @@ input, select, textarea { font-family: inherit; font-size: 1rem; }
 .about-strip strong { color: var(--heading); }
 .about-strip p { font-size: .85rem; opacity: .8; margin-top: 4px; line-height: 1.7; }
 .about-strip a { color: var(--hero-accent); font-weight: 800; text-decoration: none; }
+
+/* حقل رفع مخفي بصرياً (يعمل على أندرويد) */
+.vh-input { position: absolute !important; width: 1px !important; height: 1px !important; opacity: 0 !important; overflow: hidden; pointer-events: none; }
+
+/* نتيجة التشخيص */
+.diag-loading { text-align: center; padding: 18px; color: var(--ink-2); font-weight: 600; }
+.diag-error { background: #fdecea; color: #b3261e; border-radius: 12px; padding: 14px; margin-top: 14px; font-weight: 600; text-align: center; }
+.diag-result { background: #f3f8ee; border: 1px solid #dbe7c9; border-radius: 14px; padding: 16px; margin-top: 16px; }
+.diag-result-head { display: flex; align-items: center; gap: 8px; font-size: 1.06rem; }
+.diag-conf { margin-inline-start: auto; font-size: .8rem; color: var(--ink-2); font-weight: 600; }
+.diag-meta { color: var(--ink-2); margin: 8px 0 0; font-size: .92rem; }
+.diag-advice { margin: 10px 0 0; padding-inline-start: 20px; line-height: 1.9; }
+.diag-prods { margin-top: 14px; }
+.diag-prod-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; margin-top: 8px; }
+.diag-prod { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 8px; text-align: center; text-decoration: none; color: inherit; display: flex; flex-direction: column; gap: 4px; }
+.diag-prod img { width: 100%; aspect-ratio: 1; object-fit: contain; }
+.diag-prod span { font-size: .82rem; font-weight: 600; }
+.diag-prod b { color: var(--green); font-size: .88rem; }
+.diag-note { margin: 12px 0 0; font-size: .85rem; color: var(--ink-2); }
+#d-diagnose:disabled { opacity: .55; cursor: not-allowed; }
