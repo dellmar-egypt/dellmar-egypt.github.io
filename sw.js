@@ -1,5 +1,5 @@
 /* عامل خدمة ديلمار ايجيبت — يجعل المتجر يعمل كتطبيق ويفتح دون إنترنت */
-var CACHE = "dellmar-v8";
+var CACHE = "dellmar-v9";
 var ASSETS = [
   "./",
   "./index.html",
@@ -37,7 +37,7 @@ self.addEventListener("activate", function (e) {
 /* الشبكة أولاً للطلبات، والتخزين المؤقت أولاً للملفات الثابتة */
 self.addEventListener("fetch", function (e) {
   var url = new URL(e.request.url);
-  if (e.request.method !== "GET") return;
+  if (e.request.method !== "GET" || (url.protocol !== "https:" && url.protocol !== "http:")) return;
   if (url.hostname === "api.web3forms.com") return; // الطلبات دائماً عبر الشبكة
 
   if (url.origin === location.origin) {

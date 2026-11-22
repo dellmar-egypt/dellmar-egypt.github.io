@@ -372,35 +372,31 @@
     }).filter(function (x) { return x.score >= 3; }).sort(function (a, b) { return b.score - a.score; }).slice(0, 4).map(function (x) { return x.p; });
   }
   function fileToDataURL(file, cb) {
-    function fallbackReader() {
-      try {
-        var rd = new FileReader();
-        rd.onload = function () { cb(typeof rd.result === "string" && rd.result.length > 100 ? rd.result : null); };
-        rd.onerror = function () { cb(null); };
-        rd.readAsDataURL(file);
-      } catch (e) { cb(null); }
-    }
-    try {
-      var img = new Image();
-      var url = URL.createObjectURL(file);
-      img.onload = function () {
-        try {
-          var max = 1024, w = img.naturalWidth, h = img.naturalHeight;
-          if (!w || !h) { URL.revokeObjectURL(url); fallbackReader(); return; }
-          var s = Math.min(1, max / Math.max(w, h));
-          var cv = document.createElement("canvas");
-          cv.width = Math.max(1, Math.round(w * s)); cv.height = Math.max(1, Math.round(h * s));
-          var cx = cv.getContext("2d");
-          if (!cx) { URL.revokeObjectURL(url); fallbackReader(); return; }
-          cx.drawImage(img, 0, 0, cv.width, cv.height);
-          URL.revokeObjectURL(url);
-          var du = cv.toDataURL("image/jpeg", 0.82);
-          if (du && du.length > 1000) cb(du); else fallbackReader();
-        } catch (e2) { fallbackReader(); }
+    var tries=0, finished=false;
+    function done(v){if(!finished){finished=true;cb(v);}}
+    function read(){
+      tries++;
+      var rd=new FileReader();
+      function retry(){if(tries<4)setTimeout(read,tries*400);else done(null);}
+      rd.onerror=retry;
+      rd.onload=function(){
+        var raw=rd.result;
+        if(typeof raw!=="string"||raw.length<100){retry();return;}
+        var img=new Image();
+        img.onerror=function(){done(raw);};
+        img.onload=function(){
+          try {
+            var w=img.naturalWidth,h=img.naturalHeight,scale=Math.min(1,1024/Math.max(w,h));
+            var cv=document.createElement("canvas");cv.width=Math.max(1,Math.round(w*scale));cv.height=Math.max(1,Math.round(h*scale));
+            cv.getContext("2d").drawImage(img,0,0,cv.width,cv.height);
+            var du=cv.toDataURL("image/jpeg",0.82);done(du.length>100?du:raw);
+          }catch(e){done(raw);}
+        };
+        img.src=raw;
       };
-      img.onerror = function () { URL.revokeObjectURL(url); fallbackReader(); };
-      img.src = url;
-    } catch (e) { fallbackReader(); }
+      try{rd.readAsDataURL(file);}catch(e){retry();}
+    }
+    read();
   }
   function runDiagnose() {
     var btn = document.getElementById("d-diagnose");
@@ -511,7 +507,7 @@
 
     return '' +
     '<div class="cart-wrap">' +
-      '<div class="section-head"><h2 class="section-title">إتمام الطلب</h2><p class="section-sub">الدفع عند الاستلام</p></div>' +
+      '<div class="section-head"><h2 class="section-title">إتمام الطلب</h2><p class="section-sub">اختار طريقة الدفع المناسبة ليك</p></div>' +
       '<div class="form-card">' +
         '<div class="cart-total-row grand" style="border:none;margin:0;padding-top:0"><span>إجمالي الطلب</span><span>' + fmtPrice(cartTotal()) + '</span></div>' +
         summary +
@@ -524,7 +520,9 @@
         '</select></div>' +
         '<div class="field"><label for="f-addr">العنوان بالتفصيل *</label><textarea id="f-addr" name="address" required placeholder="المركز / القرية / الشارع / علامة مميزة"></textarea></div>' +
         '<div class="field"><label for="f-notes">ملاحظات (اختياري)</label><textarea id="f-notes" name="notes" placeholder="أي تفاصيل إضافية عن الطلب أو التوصيل"></textarea></div>' +
-        '<button class="btn btn-block" type="submit" id="order-submit">تأكيد الطلب — الدفع عند الاستلام</button>' +
+        '<div class="field"><label for="f-payment">طريقة الدفع</label><select id="f-payment" name="payment"><option value="الدفع عند الاستلام">الدفع عند الاستلام</option><option value="اتصالات كاش">اتصالات كاش</option><option value="فودافون كاش">فودافون كاش</option><option value="انستاباي">انستاباي</option></select></div>' +
+        '<div id="wallet-details" hidden><p>رقم التحويل: <b dir="ltr">01122208509</b></p><p class="form-note">راجع اسم المستلم داخل تطبيق الدفع قبل التحويل. مصاريف الشحن بتتأكد مع فريق ديلمار. رقم العملية بيتراجع يدوياً، تسجيله هنا مش تأكيد استلام المبلغ.</p><div class="field"><label for="f-ref">رقم العملية / مرجع التحويل</label><input id="f-ref" name="payment_ref" autocomplete="off"></div></div>' +
+        '<button class="btn btn-block" type="submit" id="order-submit">تأكيد الطلب</button>' +
         '<p class="form-note">بالضغط على «تأكيد الطلب» هيتم إرسال طلبك لفريق ديلمار وهنتصل بيك للتأكيد.</p>' +
       '</form>' +
     '</div>';
@@ -532,12 +530,15 @@
 
   /* ---------- صفحة نجاح الطلب ---------- */
   function viewDone(orderNo) {
+    var last=null; try {last=JSON.parse(sessionStorage.getItem("dellmar_last_order"));}catch(e){}
+    var confirmButton=last&&last.number===orderNo ? '<button class="btn btn-wa" id="confirm-order-wa">تأكيد الطلب على واتساب</button><p class="form-note">هيفتح واتساب برسالة فيها تفاصيل طلبك. راجعها واضغط إرسال بنفسك.</p>' : '';
     return '' +
     '<div class="done-wrap">' +
       '<div class="done-icon"><svg viewBox="0 0 24 24" width="44" height="44" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div>' +
       '<h2 class="section-title">تم استلام طلبك بنجاح!</h2>' +
       '<p style="margin-top:8px">هنتواصل معاك في أقرب وقت لتأكيد الطلب وترتيب التوصيل.</p>' +
       '<div class="done-order-no" dir="ltr">' + esc(orderNo) + '</div>' +
+      confirmButton +
       '<p style="margin-top:22px"><a class="btn" href="#/">العودة للمتجر</a></p>' +
     '</div>';
   }
@@ -568,7 +569,8 @@
       "المنتجات:\n" + lines.join("\n") + "\n" +
       "------------------------\n" +
       "الإجمالي: " + cartTotal() + " EGP\n" +
-      "طريقة الدفع: الدفع عند الاستلام";
+      "طريقة الدفع: " + f.get("payment") + "\n" +
+      "مرجع التحويل: " + (f.get("payment_ref") || "-");
 
     var payload = {
       access_key: CONFIG.web3formsAccessKey,
@@ -586,6 +588,7 @@
     .then(function (r) { return r.json(); })
     .then(function (res) {
       if (res && res.success) {
+        sessionStorage.setItem("dellmar_last_order", JSON.stringify({number:orderNo,message:message}));
         saveCart({});
         location.hash = "#/done/" + orderNo;
       } else {
@@ -633,6 +636,16 @@
 
   /* ---------- تفويض النقرات (أزرار السلة والكمية) ---------- */
   document.addEventListener("click", function (e) {
+    if (e.target.id === "confirm-order-wa") {
+      var last; try {last=JSON.parse(sessionStorage.getItem("dellmar_last_order"));}catch(err){}
+      if (last && last.message) {
+        var shareUrl = new URL("https://api.whatsapp.com/send");
+        shareUrl.searchParams.set("phone", "201122208509");
+        shareUrl.searchParams.set("text", last.message);
+        window.open(shareUrl.href, "_blank", "noopener");
+      }
+      return;
+    }
     var t = e.target.closest("[data-add],[data-add-qty],[data-line],[data-remove],[data-step],#d-diagnose,#d-clear");
     if (!t) return;
     if (t.dataset.add) { e.preventDefault(); addToCart(t.dataset.add, 1); }
@@ -667,12 +680,16 @@
   });
 
   document.addEventListener("change", function (e) {
+    if (e.target.id === "f-payment") {
+      document.getElementById("wallet-details").hidden = e.target.value === "الدفع عند الاستلام";
+      document.getElementById("f-ref").required = e.target.value !== "الدفع عند الاستلام";
+    }
     if (e.target.id === "d-photo" && e.target.files && e.target.files[0]) {
       var dFile = e.target.files[0];
       window.__dPhoto = dFile;
       window.__dPhotoURL = null;
       var prevImg = document.getElementById("d-preview-img");
-      try { prevImg.src = URL.createObjectURL(dFile); } catch (err) {}
+      prevImg.removeAttribute("src");
       document.getElementById("d-preview").hidden = false;
       document.getElementById("d-pick").hidden = true;
       var db = document.getElementById("d-diagnose");
@@ -680,6 +697,7 @@
       fileToDataURL(dFile, function (du) {
         if (window.__dPhoto !== dFile) return;
         window.__dPhotoURL = du;
+        if(du) prevImg.src=du;
         if (db) { db.disabled = !du; db.textContent = "🔍 شخّص النبات"; }
         if (!du) {
           var dr = document.getElementById("d-result");
@@ -701,6 +719,7 @@
         flashToast("رقم الموبايل لازم يكون 11 رقم ويبدأ بـ 01");
         return;
       }
+      if (form.payment.value !== "الدفع عند الاستلام" && !form.payment_ref.value.trim()) {flashToast("اكتب رقم عملية التحويل للمراجعة"); return;}
       submitOrder(form);
     }
   });
