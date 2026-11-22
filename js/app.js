@@ -25,6 +25,7 @@
     });
   }
   function fmtPrice(n) { return n == null ? '<small>يُحدد عند التوفر</small>' : n.toLocaleString("en-EG") + ' <small>ج.م</small>'; }
+  function productImage(path) {return esc(/^https:\/\//.test(path||'') ? path : 'images/'+(path||'category-soil-fertilizers.png'));}
   function bySku(sku) { return PRODUCTS.find(function (p) { return p.sku === sku; }); }
 
   /* ---------- السلة (تُحفظ على جهاز العميل) ---------- */
@@ -131,7 +132,7 @@
   function productCard(p) {
     return '' +
     '<a class="prod-card" href="#/product/' + p.sku + '">' +
-      '<div class="prod-thumb"><img loading="lazy" src="images/' + p.img + '" alt="' + esc(p.name) + '">' + soonBadge(p) + '</div>' +
+      '<div class="prod-thumb"><img loading="lazy" src="' + productImage(p.img) + '" alt="' + esc(p.name) + '">' + soonBadge(p) + '</div>' +
       '<div class="prod-body">' +
         '<div class="prod-name">' + esc(p.name) + '</div>' +
         '<div class="prod-ing">' + esc(p.ingredient) + '</div>' +
@@ -248,7 +249,7 @@
     if (!p) return viewHome();
     return '' +
     '<div class="pdp">' +
-      '<div class="pdp-thumb"><img src="images/' + p.img + '" alt="' + esc(p.name) + '">' + soonBadge(p) + '</div>' +
+      '<div class="pdp-thumb"><img src="' + productImage(p.img) + '" alt="' + esc(p.name) + '">' + soonBadge(p) + '</div>' +
       '<div class="pdp-head">' +
         '<a class="pdp-cat" href="#/cat/' + p.cat_id + '">' + esc(p.category) + (p.sub ? " › " + esc(p.sub) : "") + '</a>' +
         '<h1 class="pdp-name">' + esc(p.name) + '</h1>' +
@@ -286,7 +287,7 @@
       var p = bySku(sku); if (!p) return "";
       return '' +
       '<div class="cart-line">' +
-        '<img src="images/' + p.img + '" alt="' + esc(p.name) + '">' +
+        '<img src="' + productImage(p.img) + '" alt="' + esc(p.name) + '">' +
         '<div class="cart-line-info"><strong>' + esc(p.name) + '</strong><div class="line-price">' + fmtPrice(p.price) + '</div></div>' +
         '<div class="cart-line-side">' +
           '<div class="qty-stepper small"><button data-line="-1" data-sku="' + sku + '">−</button><output>' + c[sku] + '</output><button data-line="1" data-sku="' + sku + '">+</button></div>' +
@@ -444,7 +445,7 @@
       var prodHtml = prods.length ?
         '<div class="diag-prods"><b>منتجات مقترحة من المتجر:</b><div class="diag-prod-grid">' +
         prods.map(function (p) {
-          return '<a class="diag-prod" href="#/product/' + p.sku + '"><img src="images/' + p.img + '" alt="' + esc(p.name) + '" loading="lazy"><span>' + esc(p.name) + '</span><b>' + p.price + ' ج</b></a>';
+          return '<a class="diag-prod" href="#/product/' + p.sku + '"><img src="' + productImage(p.img) + '" alt="' + esc(p.name) + '" loading="lazy"><span>' + esc(p.name) + '</span><b>' + p.price + ' ج</b></a>';
         }).join("") + '</div></div>' : "";
       var conf = (typeof r.confidence === "number" && r.confidence > 0) ? '<span class="diag-conf">نسبة الثقة: ' + r.confidence + '٪</span>' : "";
       out.innerHTML = '<div class="diag-result">' +
