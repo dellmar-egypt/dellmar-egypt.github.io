@@ -418,3 +418,42 @@ input, select, textarea { font-family: inherit; font-size: 1rem; }
 .doctor-banner-icon { font-size: 1.9rem; }
 .doctor-banner small { opacity: .78; }
 .doctor-banner-arrow { margin-inline-start: auto; font-size: 1.6rem; color: var(--accent); font-weight: 900; }
+
+/* ---------- شخّص نباتك: خطوات مرقمة ومعاينة الصورة ---------- */
+.diag-step { display: flex; gap: 12px; padding: 14px 0; border-bottom: 1px dashed var(--line); }
+.diag-step:last-of-type { border-bottom: none; }
+.step-num {
+  flex: 0 0 auto; width: 30px; height: 30px; border-radius: 50%;
+  background: var(--btn-bg); color: var(--btn-ink);
+  font-weight: 800; display: flex; align-items: center; justify-content: center;
+}
+.step-sub { font-size: .82rem; opacity: .75; margin: 4px 0 10px; line-height: 1.7; }
+.photo-pick {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  width: 100%; padding: 14px; border-radius: 14px; cursor: pointer;
+  border: 2px dashed var(--accent); background: var(--input-bg);
+  color: var(--hero-accent); font-weight: 800; font-size: .95rem;
+}
+.photo-preview { margin-top: 10px; position: relative; }
+.photo-preview img { width: 100%; border-radius: 14px; display: block; }
+.photo-clear {
+  position: absolute; top: 8px; inset-inline-start: 8px;
+  background: rgba(0,0,0,.6); color: #fff; border: none; border-radius: 10px;
+  padding: 7px 12px; font-size: .8rem; font-weight: 700; cursor: pointer;
+}
+
+/* ---------- زر واتساب العائم (كل الصفحات) ---------- */
+.wa-float {
+  position: fixed; z-index: 60;
+  bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px) + 14px);
+  inset-inline-start: 14px;
+  width: 54px; height: 54px; border-radius: 50%;
+  background: #22C15E; color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 8px 22px rgba(34,193,94,.45);
+  transition: transform .15s ease;
+}
+.wa-float:hover { transform: scale(1.07); }
+@media (min-width: 720px) {
+  .wa-float { bottom: 22px; inset-inline-start: 22px; }
+}

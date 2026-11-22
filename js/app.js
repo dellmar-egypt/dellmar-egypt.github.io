@@ -301,16 +301,41 @@
     return '' +
     '<div class="cart-wrap">' +
       '<div class="section-head"><h2 class="section-title">شخّص نباتك مجاناً</h2>' +
-      '<p class="section-sub">خدمة من مهندسي ديلمار ايجيبت</p>' +
+      '<p class="section-sub">خدمة من مهندسي ديلمار ايجيبت — التشخيص والعلاج المناسب من منتجات ديلمار</p>' +
       '<div class="section-ornament"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg></div></div>' +
       '<div class="form-card">' +
-        '<p style="font-size:.95rem;margin-bottom:14px">صوّر الورقة أو الثمرة المصابة صورة واضحة في ضوء النهار، وابعتها لنا على واتساب — يرد عليك مختص بالتشخيص والعلاج المناسب من منتجات ديلمار.</p>' +
-        '<div class="field"><label for="d-crop">نوع المحصول</label><select id="d-crop">' +
-          ['طماطم','بطاطس','بصل','قمح','ذرة','أرز','قطن','قصب سكر','عنب','مانجو','موالح','خيار','فلفل','فراولة','أخرى'].map(function(c){return '<option>'+c+'</option>';}).join('') +
-        '</select></div>' +
-        '<div class="field"><label for="d-sym">وصف الأعراض</label><textarea id="d-sym" placeholder="مثال: بقع بنية على الأوراق السفلية وذبول في القمة النامية…"></textarea></div>' +
-        '<button class="btn btn-block btn-wa" id="d-send">أرسل الصورة والأعراض عبر واتساب 💬</button>' +
-        '<p class="form-note">يفتح واتساب برسالة جاهزة — أرفق صورة النبات قبل الإرسال. أو اتصل بينا مباشرة: <a href="tel:01122208509" dir="ltr"><b>01122208509</b></a></p>' +
+        '<div class="diag-step">' +
+          '<span class="step-num">1</span>' +
+          '<div style="flex:1">' +
+            '<b>صوّر النبات المصاب</b>' +
+            '<p class="step-sub">ورقة أو ثمرة في ضوء النهار — الصورة تكون واضحة وقريبة</p>' +
+            '<label class="photo-pick" id="d-pick" for="d-photo">📷 اختر أو صوّر صورة</label>' +
+            '<input type="file" id="d-photo" accept="image/*" capture="environment" hidden>' +
+            '<div class="photo-preview" id="d-preview" hidden>' +
+              '<img id="d-preview-img" alt="صورة النبات المصاب">' +
+              '<button type="button" class="photo-clear" id="d-clear">✕ تغيير الصورة</button>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="diag-step">' +
+          '<span class="step-num">2</span>' +
+          '<div style="flex:1">' +
+            '<b>حدّد المحصول والأعراض</b>' +
+            '<div class="field" style="margin-top:10px"><label for="d-crop">نوع المحصول</label><select id="d-crop">' +
+              ['طماطم','بطاطس','بصل','قمح','ذرة','أرز','قطن','قصب سكر','عنب','مانجو','موالح','خيار','فلفل','فراولة','أخرى'].map(function(c){return '<option>'+c+'</option>';}).join('') +
+            '</select></div>' +
+            '<div class="field" style="margin-bottom:0"><label for="d-sym">وصف الأعراض</label><textarea id="d-sym" placeholder="مثال: بقع بنية على الأوراق السفلية وذبول في القمة النامية…"></textarea></div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="diag-step">' +
+          '<span class="step-num">3</span>' +
+          '<div style="flex:1">' +
+            '<b>ابعت الطلب على واتساب</b>' +
+            '<p class="step-sub">الزرار هيفتح واتساب برسالة جاهزة فيها المحصول والأعراض. <b>مهم:</b> جوه واتساب اضغط على المشبك 📎 أو الكاميرا وأرفق الصورة اللي اخترتها قبل الإرسال — المتصفح مش بيقدر يبعت الصورة أوتوماتيك.</p>' +
+            '<button class="btn btn-block btn-wa" id="d-send">إرسال طلب التشخيص عبر واتساب 💬</button>' +
+          '</div>' +
+        '</div>' +
+        '<p class="form-note">أو اتصل بينا مباشرة: <a href="tel:01122208509" dir="ltr"><b>01122208509</b></a></p>' +
       '</div>' +
     '</div>';
   }
@@ -447,7 +472,7 @@
 
   /* ---------- تفويض النقرات (أزرار السلة والكمية) ---------- */
   document.addEventListener("click", function (e) {
-    var t = e.target.closest("[data-add],[data-add-qty],[data-line],[data-remove],[data-step]");
+    var t = e.target.closest("[data-add],[data-add-qty],[data-line],[data-remove],[data-step],#d-send,#d-clear");
     if (!t) return;
     if (t.dataset.add) { e.preventDefault(); addToCart(t.dataset.add, 1); }
     else if (t.dataset.addQty) {
@@ -468,8 +493,27 @@
     else if (t.id === "d-send") {
       var crop = document.getElementById("d-crop").value;
       var sym = document.getElementById("d-sym").value.trim() || "—";
-      var msg = "السلام عليكم 🌿\nطلب تشخيص نبات\nالمحصول: " + crop + "\nالأعراض: " + sym + "\n(سأرفق صورة النبات)";
+      var hasPhoto = !!window.__dPhoto;
+      var msg = "السلام عليكم 🌿\nطلب تشخيص نبات\nالمحصول: " + crop + "\nالأعراض: " + sym +
+        (hasPhoto ? "\n📷 هرفق صورة النبات في الرسالة دي" : "\n(هبعت صورة النبات في رسالة منفصلة)");
       window.open("https://wa.me/201122208509?text=" + encodeURIComponent(msg), "_blank", "noopener");
+      flashToast("أرفق الصورة في واتساب قبل الإرسال 📎");
+    }
+    else if (t.id === "d-clear") {
+      window.__dPhoto = null;
+      var inp = document.getElementById("d-photo");
+      if (inp) inp.value = "";
+      document.getElementById("d-preview").hidden = true;
+      document.getElementById("d-pick").hidden = false;
+    }
+  });
+
+  document.addEventListener("change", function (e) {
+    if (e.target.id === "d-photo" && e.target.files && e.target.files[0]) {
+      window.__dPhoto = e.target.files[0];
+      document.getElementById("d-preview-img").src = URL.createObjectURL(e.target.files[0]);
+      document.getElementById("d-preview").hidden = false;
+      document.getElementById("d-pick").hidden = true;
     }
   });
 
