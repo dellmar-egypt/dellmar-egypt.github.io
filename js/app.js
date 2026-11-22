@@ -622,7 +622,11 @@
     }
     var parts = hash.split("/").filter(Boolean);
     var html;
-    if (!parts.length) html = viewHome();
+    if (CONFIG.requireLogin && !window.DellmarAccount.loggedIn() && ['login','signup'].indexOf(parts[0])===-1) {
+      try { sessionStorage.setItem('dellmar_return_to', location.hash || '#/'); } catch(e) {}
+      html = window.DellmarAccount.view();
+    }
+    else if (!parts.length) html = viewHome();
     else if (parts[0] === "signup") html = window.DellmarAccount.signup();
     else if (parts[0] === "orders") html = window.DellmarAccount.orders();
     else if (parts[0] === "login") html = window.DellmarAccount.view();
@@ -747,6 +751,12 @@
 
   /* ---------- تسجيل عامل الخدمة (PWA) ---------- */
   if ("serviceWorker" in navigator && location.protocol.indexOf("http") === 0) {
-    navigator.serviceWorker.register("sw.js").catch(function () {});
+    var hadWorker = !!navigator.serviceWorker.controller;
+    navigator.serviceWorker.addEventListener('controllerchange', function () {
+      if (hadWorker) document.getElementById('update-ready').hidden = false;
+      hadWorker = true;
+    });
+    document.getElementById('update-reload').onclick = function () { location.reload(); };
+    navigator.serviceWorker.register("sw.js", {updateViaCache:'none'}).then(function(reg){return reg.update();}).catch(function () {});
   }
 })();

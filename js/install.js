@@ -9,7 +9,7 @@
   var display = window.matchMedia('(display-mode: standalone)');
   var installed = false;
   function sync() {
-    entry.hidden = installed || display.matches || window.navigator.standalone === true;
+    entry.hidden = false;
   }
   function help() {
     var ua = navigator.userAgent || '';

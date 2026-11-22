@@ -514,7 +514,7 @@ input, select, textarea { font-family: inherit; font-size: 1rem; }
 #install-help p{margin:0 0 16px}
 #install-help .install-note{font-size:.8rem;color:#53605a}
 #install-close{background:#176341;color:#fff;min-width:90px}
-@media(display-mode:standalone){#install-entry{display:none}}
+
 
 .account-profile{max-width:540px;margin:20px auto}
 .account-profile h2{font-size:1.1rem;margin-top:0}
@@ -522,3 +522,14 @@ input, select, textarea { font-family: inherit; font-size: 1rem; }
 .account-profile dt{font-size:.85rem;color:var(--ink-2);margin-top:14px}
 .account-profile dd{margin:4px 0 0;font-weight:700;text-align:start;overflow-wrap:anywhere}
 .account-profile .btn{margin-bottom:10px}
+
+.footer-visits{margin:16px 0;font-size:.95rem}
+.footer-visits strong{display:inline-block;min-width:2ch;font-size:1.3rem;color:#e0bd69}
+.footer-visits small{display:block;font-size:.72rem;opacity:.8;margin-top:4px}
+.customer-row{display:flex;flex-direction:column;gap:6px;padding:14px 0;border-bottom:1px solid var(--line);overflow-wrap:anywhere}
+.customer-row span{text-align:right}
+.customer-row small{color:var(--ink-2)}
+
+#update-ready{position:fixed;top:8px;left:12px;right:12px;z-index:1000;display:flex;align-items:center;justify-content:center;gap:12px;background:#fff8dc;color:#191f45;box-shadow:0 3px 20px #0003;padding:12px;border-radius:10px;font-size:.85rem}
+#update-ready[hidden]{display:none}
+#update-ready button{font:inherit;font-weight:800;padding:8px 12px;border:0;border-radius:8px;background:#176341;color:#fff;cursor:pointer}

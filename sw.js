@@ -1,5 +1,5 @@
 /* عامل خدمة ديلمار ايجيبت — يجعل المتجر يعمل كتطبيق ويفتح دون إنترنت */
-var CACHE = "dellmar-v18";
+var CACHE = "dellmar-v19";
 var ASSETS = [
   "./",
   "./index.html",
@@ -56,7 +56,7 @@ self.addEventListener("fetch", function (e) {
     } else {
       /* الكود والصفحات: الشبكة أولاً ليصل التحديث فوراً، والكاش احتياطي بلا إنترنت */
       e.respondWith(
-        fetch(e.request).then(function (res) {
+        fetch(e.request, {cache:"no-store"}).then(function (res) {
           var copy = res.clone();
           caches.open(CACHE).then(function (c) { c.put(e.request, copy); });
           return res;

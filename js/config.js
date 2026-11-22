@@ -1,5 +1,6 @@
 // إعدادات المتجر — يُملأ مفتاح Web3Forms عند النشر
 window.DELLMAR_CONFIG = {
+  requireLogin: true, // Set false to reopen browsing without an account.
   storeName: "ديلمار ايجيبت",
   phone: "01122208509",
   web3formsAccessKey: "3475e909-5947-4d02-8f8d-d8db06490cf7",   // يوضع هنا مفتاح Web3Forms الذي يصل على الإيميل
