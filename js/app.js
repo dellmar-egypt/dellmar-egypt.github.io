@@ -145,6 +145,12 @@
     '</a>';
   }
 
+  function viewCategories() {
+    return '<section class="section"><div class="section-head"><h1 class="section-title">كل التصنيفات</h1><p class="section-sub">اختار الفئة عشان تشوف منتجاتها</p></div><div class="cat-grid">' + CATEGORIES.map(function (c) {
+      return '<a class="cat-card" href="#/cat/' + c.id + '"><img class="cat-card-img" src="images/' + c.img + '" alt="' + esc(c.name) + '"><div class="cat-card-body"><strong>' + esc(c.name) + '</strong><span>' + c.count + ' منتجًا</span></div></a>';
+    }).join('') + '</div></section>';
+  }
+
   /* ---------- الرئيسية ---------- */
   function viewHome() {
     var featured = PRODUCTS.filter(function (p) { return !p.soon; }).slice(0, 10);
@@ -177,7 +183,7 @@
     '<section class="section" style="padding-bottom:0">' +
       '<a class="doctor-banner" href="#/doctor">' +
         '<span class="doctor-banner-icon">🌿</span>' +
-        '<span><strong>نباتك مريض؟ شخّصه مجاناً</strong><br><small>صوّر الورقة أو الثمرة وأرسلها — يرد عليك مختص بالتشخيص والعلاج المناسب</small></span>' +
+        '<span><strong>نباتك مريض؟ شخّصه مجاناً</strong><br><small>صوّر الورقة أو الثمرة — الذكاء الاصطناعي يحللها ويعرض التشخيص هنا</small></span>' +
         '<span class="doctor-banner-arrow">‹</span>' +
       '</a>' +
     '</section>' +
@@ -604,6 +610,7 @@
     var parts = hash.split("/").filter(Boolean);
     var html;
     if (!parts.length) html = viewHome();
+    else if (parts[0] === "categories") html = viewCategories();
     else if (parts[0] === "cat") html = viewCategory(parts[1], query.sub);
     else if (parts[0] === "product") html = viewProduct(parts[1]);
     else if (parts[0] === "doctor") html = viewDoctor();
@@ -617,7 +624,7 @@
     window.scrollTo(0, 0);
 
     // تفعيل التبويب الحالي في الشريط السفلي
-    var nav = !parts.length ? "home" : (parts[0] === "cart" || parts[0] === "checkout") ? "cart" : parts[0] === "cat" ? "cats" : "";
+    var nav = !parts.length ? "home" : (parts[0] === "cart" || parts[0] === "checkout") ? "cart" : (parts[0] === "cat" || parts[0] === "categories") ? "cats" : "";
     document.querySelectorAll(".tabbar a").forEach(function (a) {
       a.classList.toggle("on", a.getAttribute("data-nav") === nav);
     });
