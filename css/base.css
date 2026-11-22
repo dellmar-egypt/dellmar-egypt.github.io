@@ -539,3 +539,5 @@ input, select, textarea { font-family: inherit; font-size: 1rem; }
 .btn-danger:disabled{opacity:.45}
 .danger-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
 #delete-confirm-input{width:100%;padding:12px;border:1px solid #ddd;border-radius:12px}
+
+.brand-text .app-ver{display:block;margin-top:2px;font-size:.62rem;opacity:.55;letter-spacing:.02em}

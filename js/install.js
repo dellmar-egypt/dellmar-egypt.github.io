@@ -43,7 +43,16 @@
     }
     if (!dialog.open) dialog.showModal();
   }
+  function downloadApk() {
+    var a = document.createElement('a');
+    a.href = APK; a.download = 'Dellmar.apk'; a.rel = 'noopener';
+    document.body.appendChild(a); a.click(); a.remove();
+    steps.textContent = 'بدأ تحميل تطبيق ديلمار. لما يخلص افتح الملف من إشعارات التحميل واضغط «تثبيت». لو الموبايل سأل، اسمح بالتثبيت من المتصفح مرة واحدة. بعدها هتلاقي ديلمار كتطبيق حقيقي على جهازك.';
+    apkBtn.hidden = false;
+    if (!dialog.open) dialog.showModal();
+  }
   async function install() {
+    if (isAndroid) { downloadApk(); return; }
     if (deferred) {
       var prompt = deferred;
       deferred = null;
