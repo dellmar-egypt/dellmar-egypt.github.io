@@ -500,7 +500,7 @@ input, select, textarea { font-family: inherit; font-size: 1rem; }
 @media (min-width:900px) { .header-account { display:inline-flex; } }
 
 /* Always-visible, non-overlay install entry. No prompt event or dismissal storage needed. */
-#install-entry{display:flex;align-items:center;gap:10px;padding:10px max(14px,calc((100% - 1120px)/2));background:#176341;color:#fff}
+#install-entry{position:sticky;top:var(--header-h);z-index:49;display:flex;align-items:center;gap:10px;padding:10px max(14px,calc((100% - 1120px)/2));background:#176341;color:#fff}
 #install-entry[hidden]{display:none}
 #install-entry img{border-radius:8px;flex-shrink:0}
 #install-entry>span{display:flex;flex:1;flex-direction:column;line-height:1.5;min-width:0}
