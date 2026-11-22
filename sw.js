@@ -1,5 +1,5 @@
 /* عامل خدمة ديلمار ايجيبت — يجعل المتجر يعمل كتطبيق ويفتح دون إنترنت */
-var CACHE = "dellmar-v1";
+var CACHE = "dellmar-v2";
 var ASSETS = [
   "./",
   "./index.html",
@@ -40,14 +40,26 @@ self.addEventListener("fetch", function (e) {
   if (url.hostname === "api.web3forms.com") return; // الطلبات دائماً عبر الشبكة
 
   if (url.origin === location.origin) {
-    e.respondWith(
-      caches.match(e.request).then(function (hit) {
-        return hit || fetch(e.request).then(function (res) {
+    if (url.pathname.indexOf("/images/") === 0 || url.pathname.indexOf("/icons/") === 0) {
+      /* الصور والأيقونات: الكاش أولاً لأنها لا تتغير */
+      e.respondWith(
+        caches.match(e.request).then(function (hit) {
+          return hit || fetch(e.request).then(function (res) {
+            var copy = res.clone();
+            caches.open(CACHE).then(function (c) { c.put(e.request, copy); });
+            return res;
+          });
+        })
+      );
+    } else {
+      /* الكود والصفحات: الشبكة أولاً ليصل التحديث فوراً، والكاش احتياطي بلا إنترنت */
+      e.respondWith(
+        fetch(e.request).then(function (res) {
           var copy = res.clone();
           caches.open(CACHE).then(function (c) { c.put(e.request, copy); });
           return res;
-        });
-      })
-    );
+        }).catch(function () { return caches.match(e.request); })
+      );
+    }
   }
 });
