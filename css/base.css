@@ -354,7 +354,7 @@ input, select, textarea { font-family: inherit; font-size: 1rem; }
   position: fixed; bottom: 0; inset-inline: 0; z-index: 60;
   height: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px));
   padding-bottom: env(safe-area-inset-bottom, 0px);
-  display: grid; grid-template-columns: repeat(4, 1fr);
+  display: grid; grid-template-columns: repeat(5, 1fr);
   background: var(--tabbar-bg); color: var(--tabbar-ink);
   box-shadow: 0 -4px 20px rgba(12, 16, 38, .14);
 }
@@ -495,3 +495,6 @@ input, select, textarea { font-family: inherit; font-size: 1rem; }
 .diag-prod b { color: var(--green); font-size: .88rem; }
 .diag-note { margin: 12px 0 0; font-size: .85rem; color: var(--ink-2); }
 #d-diagnose:disabled { opacity: .55; cursor: not-allowed; }
+
+.header-account { display:none; }
+@media (min-width:900px) { .header-account { display:inline-flex; } }
