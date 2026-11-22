@@ -516,7 +516,7 @@
       '</div>' +
       (!window.DellmarAccount.loggedIn()?'<p class="form-card"><a href="#/login">سجل دخولك أو اعمل حساب</a> عشان تتابع طلباتك في «طلباتي». تقدر تكمل كضيف كمان.</p>':'') +
       '<form class="form-card" id="order-form" novalidate>' +
-        '<div class="field"><label for="f-name">الاسم بالكامل *</label><input id="f-name" name="name" required autocomplete="name" placeholder="مثال: محمود أحمد"></div>' +
+        '<div class="field"><label for="f-name">الاسم *</label><input id="f-name" name="name" required autocomplete="name" placeholder="مثال: محمود"></div>' +
         '<div class="field"><label for="f-phone">رقم الموبايل *</label><input id="f-phone" name="phone" required inputmode="tel" autocomplete="tel" dir="ltr" placeholder="01xxxxxxxxx"><div class="hint">هنتواصل معاك على الرقم ده لتأكيد الطلب</div></div>' +
         '<div class="field"><label for="f-gov">المحافظة *</label><select id="f-gov" name="governorate" required><option value="">اختر المحافظة…</option>' +
           GOVS.map(function (g) { return "<option>" + g + "</option>"; }).join("") +

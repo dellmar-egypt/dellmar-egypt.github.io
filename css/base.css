@@ -498,3 +498,14 @@ input, select, textarea { font-family: inherit; font-size: 1rem; }
 
 .header-account { display:none; }
 @media (min-width:900px) { .header-account { display:inline-flex; } }
+
+/* install prompt */
+#install-bar{position:fixed;left:10px;right:10px;bottom:calc(76px + env(safe-area-inset-bottom));z-index:60;display:flex;align-items:center;gap:10px;background:#191F45;color:#fff;border-radius:14px;padding:10px 12px;box-shadow:0 6px 24px rgba(0,0,0,.3);max-width:560px;margin:0 auto}
+#install-bar[hidden]{display:none}
+#install-bar img{border-radius:10px}
+#install-bar .ib-text{flex:1;display:flex;flex-direction:column;font-size:.8rem;line-height:1.4}
+#install-bar .ib-text strong{font-size:.95rem}
+#install-bar .btn{white-space:nowrap;padding:8px 14px}
+#install-bar #ib-x{background:none;border:0;color:#fff;font-size:1.5rem;line-height:1;cursor:pointer;padding:0 4px}
+#install-head{background:#C9A24B;color:#191F45;border:0;border-radius:999px;font:inherit;font-weight:700;font-size:.8rem;padding:6px 12px;cursor:pointer}
+@media (min-width:900px){#install-bar{bottom:20px}}
