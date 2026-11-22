@@ -1,45 +1,49 @@
-/* تثبيت المتجر كتطبيق (PWA) */
+/* Install entry never depends on Chrome's optional beforeinstallprompt event. */
 (function () {
   var deferred = null;
-  var standalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
-  if (standalone) return;
-  var ua = navigator.userAgent || "";
-  var isIOS = /iphone|ipad|ipod/i.test(ua);
-  var KEY = "dellmar-install-dismissed";
-  function dismissed() { try { return Date.now() - Number(localStorage.getItem(KEY) || 0) < 3 * 864e5; } catch (e) { return false; } }
-  function bar() {
-    var b = document.getElementById("install-bar");
-    if (b) return b;
-    b = document.createElement("div");
-    b.id = "install-bar";
-    b.setAttribute("role", "region");
-    b.innerHTML = '<img src="icons/icon-192.png" alt="" width="40" height="40"><div class="ib-text"><strong>نزّل تطبيق ديلمار</strong><span id="ib-sub">أيقونة على شاشتك وبيفتح زي أي تطبيق</span></div><button type="button" id="ib-go" class="btn">نزّل التطبيق</button><button type="button" id="ib-x" aria-label="إغلاق">×</button>';
-    document.body.appendChild(b);
-    document.getElementById("ib-x").onclick = function () { b.hidden = true; try { localStorage.setItem(KEY, Date.now()); } catch (e) {} };
-    document.getElementById("ib-go").onclick = install;
-    return b;
+  var entry = document.getElementById('install-entry');
+  var button = document.getElementById('install-go');
+  var dialog = document.getElementById('install-help');
+  var steps = document.getElementById('install-steps');
+  var close = document.getElementById('install-close');
+  var display = window.matchMedia('(display-mode: standalone)');
+  var installed = false;
+  function sync() {
+    entry.hidden = installed || display.matches || window.navigator.standalone === true;
   }
-  function install() {
-    if (deferred) {
-      deferred.prompt();
-      deferred.userChoice.then(function () { deferred = null; var b = document.getElementById("install-bar"); if (b) b.hidden = true; });
-    } else if (isIOS) {
-      document.getElementById("ib-sub").textContent = "اضغط زر المشاركة في سفاري ثم «إضافة إلى الشاشة الرئيسية»";
+  function help() {
+    var ua = navigator.userAgent || '';
+    if (/iphone|ipad|ipod/i.test(ua)) {
+      steps.textContent = 'افتح الموقع في Safari، واضغط زر المشاركة، ثم «إضافة إلى الشاشة الرئيسية»، وبعدها «إضافة».';
+    } else if (/android/i.test(ua)) {
+      steps.textContent = 'افتح الموقع في Chrome نفسه، مش داخل واتساب أو فيسبوك. من قائمة Chrome (⋮) اختار «إضافة إلى الشاشة الرئيسية» ثم «تثبيت» أو «إنشاء اختصار». لو ظهر «تثبيت التطبيق» اختاره. لو الاختيار مش ظاهر، اتأكد إن Chrome محدّث وإنك مش في وضع التصفح المتخفي.';
     } else {
-      document.getElementById("ib-sub").textContent = "افتح قائمة المتصفح (⋮) ثم «تثبيت التطبيق» أو «إضافة إلى الشاشة الرئيسية»";
+      steps.textContent = 'من قائمة المتصفح اختار «تثبيت ديلمار» أو «إضافة إلى الشاشة الرئيسية». على الكمبيوتر ممكن تلاقي علامة التثبيت جنب شريط العنوان. لو الاختيار مش موجود، جرّب Chrome أو Edge محدّث.';
     }
+    if (!dialog.open) dialog.showModal();
   }
-  function show() { if (!dismissed()) bar().hidden = false; addHeaderBtn(); }
-  function addHeaderBtn() {
-    if (document.getElementById("install-head")) return;
-    var h = document.querySelector(".header-actions");
-    if (!h) return;
-    var a = document.createElement("button");
-    a.type = "button"; a.id = "install-head"; a.textContent = "نزّل التطبيق";
-    a.onclick = install;
-    h.insertBefore(a, h.firstChild);
+  async function install() {
+    if (!deferred) { help(); return; }
+    var prompt = deferred;
+    deferred = null;
+    button.disabled = true;
+    try {
+      await prompt.prompt();
+      var choice = await prompt.userChoice;
+      if (choice.outcome === 'accepted') { installed = true; sync(); }
+    } catch (e) { help(); }
+    finally { button.disabled = false; }
   }
-  window.addEventListener("beforeinstallprompt", function (e) { e.preventDefault(); deferred = e; show(); });
-  window.addEventListener("appinstalled", function () { deferred = null; var b = document.getElementById("install-bar"); if (b) b.hidden = true; var h = document.getElementById("install-head"); if (h) h.remove(); });
-  if (isIOS) window.addEventListener("load", function () { setTimeout(show, 2500); });
+  button.addEventListener('click', install);
+  close.addEventListener('click', function () { dialog.close(); button.focus(); });
+  dialog.addEventListener('click', function (event) { if (event.target === dialog) dialog.close(); });
+  window.addEventListener('beforeinstallprompt', function (event) {
+    event.preventDefault(); deferred = event; sync();
+  });
+  window.addEventListener('appinstalled', function () {
+    installed = true; deferred = null; if (dialog.open) dialog.close(); sync();
+  });
+  if (display.addEventListener) display.addEventListener('change', sync);
+  window.addEventListener('pageshow', sync);
+  sync();
 })();

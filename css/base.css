@@ -499,14 +499,26 @@ input, select, textarea { font-family: inherit; font-size: 1rem; }
 .header-account { display:none; }
 @media (min-width:900px) { .header-account { display:inline-flex; } }
 
-/* install prompt */
-#install-bar{position:fixed;left:10px;right:10px;bottom:calc(76px + env(safe-area-inset-bottom));z-index:60;display:flex;align-items:center;gap:10px;background:#191F45;color:#fff;border-radius:14px;padding:10px 12px;box-shadow:0 6px 24px rgba(0,0,0,.3);max-width:560px;margin:0 auto}
-#install-bar[hidden]{display:none}
-#install-bar img{border-radius:10px}
-#install-bar .ib-text{flex:1;display:flex;flex-direction:column;font-size:.8rem;line-height:1.4}
-#install-bar .ib-text strong{font-size:.95rem}
-#install-bar .btn{white-space:nowrap;padding:8px 14px}
-#install-bar #ib-x{background:none;border:0;color:#fff;font-size:1.5rem;line-height:1;cursor:pointer;padding:0 4px}
-#install-head{background:#C9A24B;color:#191F45;border:0;border-radius:999px;font:inherit;font-weight:700;font-size:.8rem;padding:6px 12px;cursor:pointer}
-@media (min-width:900px){#install-bar{bottom:20px}}
-@media (max-width:700px){#install-head{display:none}}
+/* Always-visible, non-overlay install entry. No prompt event or dismissal storage needed. */
+#install-entry{display:flex;align-items:center;gap:10px;padding:10px max(14px,calc((100% - 1120px)/2));background:#176341;color:#fff}
+#install-entry[hidden]{display:none}
+#install-entry img{border-radius:8px;flex-shrink:0}
+#install-entry>span{display:flex;flex:1;flex-direction:column;line-height:1.5;min-width:0}
+#install-entry strong{font-size:.9rem}
+#install-entry small{font-size:.72rem}
+#install-go,#install-close{border:0;border-radius:9px;background:#fff;color:#174b35;font:inherit;font-size:.85rem;font-weight:800;padding:9px 13px;cursor:pointer;white-space:nowrap}
+#install-go:disabled{opacity:.6}
+#install-help{margin:auto;border:0;border-radius:16px;padding:24px;max-width:440px;width:calc(100% - 32px);box-sizing:border-box;color:#191f45;line-height:1.9;max-height:85dvh;overflow:auto}
+#install-help::backdrop{background:rgba(0,0,0,.55)}
+#install-help h2{font-size:1.15rem;margin:0 0 12px}
+#install-help p{margin:0 0 16px}
+#install-help .install-note{font-size:.8rem;color:#53605a}
+#install-close{background:#176341;color:#fff;min-width:90px}
+@media(display-mode:standalone){#install-entry{display:none}}
+
+.account-profile{max-width:540px;margin:20px auto}
+.account-profile h2{font-size:1.1rem;margin-top:0}
+.account-profile dl{margin:20px 0}
+.account-profile dt{font-size:.85rem;color:var(--ink-2);margin-top:14px}
+.account-profile dd{margin:4px 0 0;font-weight:700;text-align:start;overflow-wrap:anywhere}
+.account-profile .btn{margin-bottom:10px}

@@ -625,7 +625,8 @@
     if (!parts.length) html = viewHome();
     else if (parts[0] === "signup") html = window.DellmarAccount.signup();
     else if (parts[0] === "orders") html = window.DellmarAccount.orders();
-    else if (parts[0] === "login" || parts[0] === "admin") html = window.DellmarAccount.view();
+    else if (parts[0] === "login") html = window.DellmarAccount.view();
+    else if (parts[0] === "admin") html = window.DellmarAccount.admin();
     else if (parts[0] === "categories") html = viewCategories();
     else if (parts[0] === "cat") html = viewCategory(parts[1], query.sub);
     else if (parts[0] === "product") html = viewProduct(parts[1]);
