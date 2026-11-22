@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "eg.dellmar.store",
+        "sha256_cert_fingerprints": ["02:E2:0E:BC:00:23:DA:92:44:CD:FB:CF:68:DF:7C:5F:5F:70:8A:FD:BA:68:3F:F6:7A:BA:88:91:D6:5A:FF:59"]
+      }
+    }]
