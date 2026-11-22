@@ -365,71 +365,100 @@
       return { p: p, score: score };
     }).filter(function (x) { return x.score >= 3; }).sort(function (a, b) { return b.score - a.score; }).slice(0, 4).map(function (x) { return x.p; });
   }
-  function readImageDataURL(file, cb) {
-    var img = new Image();
-    var url = URL.createObjectURL(file);
-    img.onload = function () {
-      var max = 1024, w = img.naturalWidth, h = img.naturalHeight;
-      var s = Math.min(1, max / Math.max(w, h));
-      var cv = document.createElement("canvas");
-      cv.width = Math.round(w * s); cv.height = Math.round(h * s);
-      cv.getContext("2d").drawImage(img, 0, 0, cv.width, cv.height);
-      URL.revokeObjectURL(url);
-      cb(cv.toDataURL("image/jpeg", 0.82));
-    };
-    img.onerror = function () { URL.revokeObjectURL(url); cb(null); };
-    img.src = url;
+  function fileToDataURL(file, cb) {
+    function fallbackReader() {
+      try {
+        var rd = new FileReader();
+        rd.onload = function () { cb(typeof rd.result === "string" && rd.result.length > 100 ? rd.result : null); };
+        rd.onerror = function () { cb(null); };
+        rd.readAsDataURL(file);
+      } catch (e) { cb(null); }
+    }
+    try {
+      var img = new Image();
+      var url = URL.createObjectURL(file);
+      img.onload = function () {
+        try {
+          var max = 1024, w = img.naturalWidth, h = img.naturalHeight;
+          if (!w || !h) { URL.revokeObjectURL(url); fallbackReader(); return; }
+          var s = Math.min(1, max / Math.max(w, h));
+          var cv = document.createElement("canvas");
+          cv.width = Math.max(1, Math.round(w * s)); cv.height = Math.max(1, Math.round(h * s));
+          var cx = cv.getContext("2d");
+          if (!cx) { URL.revokeObjectURL(url); fallbackReader(); return; }
+          cx.drawImage(img, 0, 0, cv.width, cv.height);
+          URL.revokeObjectURL(url);
+          var du = cv.toDataURL("image/jpeg", 0.82);
+          if (du && du.length > 1000) cb(du); else fallbackReader();
+        } catch (e2) { fallbackReader(); }
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); fallbackReader(); };
+      img.src = url;
+    } catch (e) { fallbackReader(); }
   }
   function runDiagnose() {
     var btn = document.getElementById("d-diagnose");
     var out = document.getElementById("d-result");
-    if (!window.__dPhoto || !btn) return;
+    if (!btn) return;
+    if (window.__dPhotoURL) { sendPhoto(window.__dPhotoURL, btn, out); return; }
+    if (!window.__dPhoto) return;
+    btn.disabled = true;
+    btn.textContent = "⏳ بنجهّز الصورة…";
+    fileToDataURL(window.__dPhoto, function (dataURL) {
+      btn.disabled = false; btn.textContent = "🔍 شخّص النبات";
+      if (!dataURL) {
+        out.innerHTML = '<div class="diag-error">مش قادرين نفتح الصورة دي — جرّب تختارها أو تصوّرها تاني.</div>';
+        return;
+      }
+      window.__dPhotoURL = dataURL;
+      sendPhoto(dataURL, btn, out);
+    });
+  }
+  function sendPhoto(dataURL, btn, out) {
     btn.disabled = true;
     btn.textContent = "⏳ بيحلل الصورة…";
     out.innerHTML = '<div class="diag-loading">🌿 الذكاء الاصطناعي بيفحص الصورة — استنى ثواني…</div>';
-    readImageDataURL(window.__dPhoto, function (dataURL) {
-      if (!dataURL) {
-        out.innerHTML = '<div class="diag-error">مش قادرين نقرا الصورة — جرّب صورة تانية.</div>';
-        btn.disabled = false; btn.textContent = "🔍 شخّص النبات";
+    var cropSel = document.getElementById("d-crop");
+    var cropVal = cropSel && cropSel.selectedIndex > 0 ? cropSel.value : "";
+    fetch(CONFIG.diagnoseUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "apikey": CONFIG.supabaseKey, "Authorization": "Bearer " + CONFIG.supabaseKey },
+      body: JSON.stringify({ image: dataURL, crop: cropVal })
+    }).then(function (r) {
+      if (r.status === 503) throw new Error("busy");
+      if (r.status === 400 || r.status === 413 || r.status === 422) throw new Error("badimg");
+      if (!r.ok) throw new Error("http" + r.status);
+      return r.json();
+    }).then(function (d) {
+      btn.disabled = false; btn.textContent = "🔍 شخّص النبات";
+      if (!d || !d.ok || !d.result) throw new Error("busy");
+      var r = d.result;
+      if (r.unreadable === true) {
+        out.innerHTML = '<div class="diag-error">مش قادرين نقرا الصورة — جرّب صورة أوضح للورقة أو الثمرة في ضوء كويس.</div>';
         return;
       }
-      var cropSel = document.getElementById("d-crop");
-      var cropVal = cropSel && cropSel.selectedIndex > 0 ? cropSel.value : "";
-      fetch(CONFIG.diagnoseUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "apikey": CONFIG.supabaseKey, "Authorization": "Bearer " + CONFIG.supabaseKey },
-        body: JSON.stringify({ image: dataURL, crop: cropVal })
-      }).then(function (r) {
-        if (r.status === 503) throw new Error("busy");
-        if (!r.ok) throw new Error("http" + r.status);
-        return r.json();
-      }).then(function (d) {
-        btn.disabled = false; btn.textContent = "🔍 شخّص النبات";
-        if (!d || !d.ok || !d.result) throw new Error("busy");
-        var r = d.result;
-        var adv = (r.advice || []).map(function (a) { return "<li>" + esc(a) + "</li>"; }).join("");
-        var prods = matchProducts(r.products || []);
-        var prodHtml = prods.length ?
-          '<div class="diag-prods"><b>منتجات مقترحة من المتجر:</b><div class="diag-prod-grid">' +
-          prods.map(function (p) {
-            return '<a class="diag-prod" href="#/product/' + p.sku + '"><img src="images/' + p.img + '" alt="' + esc(p.name) + '" loading="lazy"><span>' + esc(p.name) + '</span><b>' + p.price + ' ج</b></a>';
-          }).join("") + '</div></div>' : "";
-        var conf = (typeof r.confidence === "number" && r.confidence > 0) ? '<span class="diag-conf">نسبة الثقة: ' + r.confidence + '٪</span>' : "";
-        out.innerHTML = '<div class="diag-result">' +
-          '<div class="diag-result-head"><span>🩺</span><b>' + esc(r.problem || "تعذر التشخيص") + "</b>" + conf + "</div>" +
-          (r.plant ? '<p class="diag-meta">النبات: ' + esc(r.plant) + (r.status ? " — " + esc(r.status) : "") + "</p>" : "") +
-          (adv ? '<ul class="diag-advice">' + adv + "</ul>" : "") +
-          prodHtml +
-          '<p class="diag-note">لو الأعراض مستمرة كلم مهندسينا على <a href="tel:01122208509" dir="ltr"><b>01122208509</b></a></p>' +
-        "</div>";
-        out.scrollIntoView({ behavior: "smooth", block: "nearest" });
-      }).catch(function (err) {
-        btn.disabled = false; btn.textContent = "🔍 شخّص النبات";
-        var msg = err && err.message === "busy"
-          ? "السيرفر مشغول شوية — جرّب تاني بعد دقيقة 🙏"
-          : "حصلت مشكلة في الاتصال — اتأكد من النت وجرّب تاني.";
-        out.innerHTML = '<div class="diag-error">' + msg + "</div>";
-      });
+      var adv = (r.advice || []).map(function (a) { return "<li>" + esc(a) + "</li>"; }).join("");
+      var prods = matchProducts(r.products || []);
+      var prodHtml = prods.length ?
+        '<div class="diag-prods"><b>منتجات مقترحة من المتجر:</b><div class="diag-prod-grid">' +
+        prods.map(function (p) {
+          return '<a class="diag-prod" href="#/product/' + p.sku + '"><img src="images/' + p.img + '" alt="' + esc(p.name) + '" loading="lazy"><span>' + esc(p.name) + '</span><b>' + p.price + ' ج</b></a>';
+        }).join("") + '</div></div>' : "";
+      var conf = (typeof r.confidence === "number" && r.confidence > 0) ? '<span class="diag-conf">نسبة الثقة: ' + r.confidence + '٪</span>' : "";
+      out.innerHTML = '<div class="diag-result">' +
+        '<div class="diag-result-head"><span>🩺</span><b>' + esc(r.problem || "تعذر التشخيص") + "</b>" + conf + "</div>" +
+        (r.plant ? '<p class="diag-meta">النبات: ' + esc(r.plant) + (r.status ? " — " + esc(r.status) : "") + "</p>" : "") +
+        (adv ? '<ul class="diag-advice">' + adv + "</ul>" : "") +
+        prodHtml +
+        '<p class="diag-note">لو الأعراض مستمرة كلم مهندسينا على <a href="tel:01122208509" dir="ltr"><b>01122208509</b></a></p>' +
+      "</div>";
+      out.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }).catch(function (err) {
+      btn.disabled = false; btn.textContent = "🔍 شخّص النبات";
+      var msg = "حصلت مشكلة في الاتصال — اتأكد من النت وجرّب تاني.";
+      if (err && err.message === "busy") msg = "السيرفر مشغول شوية — جرّب تاني بعد دقيقة 🙏";
+      else if (err && err.message === "badimg") msg = "الصورة وصلتش سليمة — جرّب صورة تانية.";
+      out.innerHTML = '<div class="diag-error">' + msg + "</div>";
     });
   }
 
@@ -617,6 +646,7 @@
     else if (t.id === "d-diagnose") { runDiagnose(); }
     else if (t.id === "d-clear") {
       window.__dPhoto = null;
+      window.__dPhotoURL = null;
       var inp = document.getElementById("d-photo");
       if (inp) inp.value = "";
       document.getElementById("d-preview").hidden = true;
@@ -630,12 +660,24 @@
 
   document.addEventListener("change", function (e) {
     if (e.target.id === "d-photo" && e.target.files && e.target.files[0]) {
-      window.__dPhoto = e.target.files[0];
-      document.getElementById("d-preview-img").src = URL.createObjectURL(e.target.files[0]);
+      var dFile = e.target.files[0];
+      window.__dPhoto = dFile;
+      window.__dPhotoURL = null;
+      var prevImg = document.getElementById("d-preview-img");
+      try { prevImg.src = URL.createObjectURL(dFile); } catch (err) {}
       document.getElementById("d-preview").hidden = false;
       document.getElementById("d-pick").hidden = true;
       var db = document.getElementById("d-diagnose");
-      if (db) db.disabled = false;
+      if (db) { db.disabled = true; db.textContent = "⏳ بنجهّز الصورة…"; }
+      fileToDataURL(dFile, function (du) {
+        if (window.__dPhoto !== dFile) return;
+        window.__dPhotoURL = du;
+        if (db) { db.disabled = !du; db.textContent = "🔍 شخّص النبات"; }
+        if (!du) {
+          var dr = document.getElementById("d-result");
+          if (dr) dr.innerHTML = '<div class="diag-error">مش قادرين نفتح الصورة دي على الموبايل — جرّب تصوّرها تاني أو اختار صورة مختلفة.</div>';
+        }
+      });
     }
   });
 
