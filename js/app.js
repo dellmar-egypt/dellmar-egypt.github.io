@@ -514,7 +514,6 @@
         '<div class="cart-total-row grand" style="border:none;margin:0;padding-top:0"><span>إجمالي الطلب</span><span>' + fmtPrice(cartTotal()) + '</span></div>' +
         summary +
       '</div>' +
-      (!window.DellmarAccount.loggedIn()?'<p class="form-card"><a href="#/login">سجل دخولك أو اعمل حساب</a> عشان تتابع طلباتك في «طلباتي». تقدر تكمل كضيف كمان.</p>':'') +
       '<form class="form-card" id="order-form" novalidate>' +
         '<div class="field"><label for="f-name">الاسم *</label><input id="f-name" name="name" required autocomplete="name" placeholder="مثال: محمود"></div>' +
         '<div class="field"><label for="f-phone">رقم الموبايل *</label><input id="f-phone" name="phone" required inputmode="tel" autocomplete="tel" dir="ltr" placeholder="01xxxxxxxxx"><div class="hint">هنتواصل معاك على الرقم ده لتأكيد الطلب</div></div>' +
@@ -548,6 +547,7 @@
 
   /* ---------- إرسال الطلب عبر Web3Forms ---------- */
   function submitOrder(form) {
+    if (!window.DellmarAccount.loggedIn()) { try { sessionStorage.setItem("dellmar_return_to", "#/checkout"); sessionStorage.setItem("dellmar_login_reason", "checkout"); } catch(e) {} location.hash = "#/login"; return; }
     var btn = document.getElementById("order-submit");
     btn.disabled = true; btn.textContent = "جاري إرسال الطلب…";
 
@@ -624,6 +624,10 @@
     var html;
     if (CONFIG.requireLogin && !window.DellmarAccount.loggedIn() && ['login','signup'].indexOf(parts[0])===-1) {
       try { sessionStorage.setItem('dellmar_return_to', location.hash || '#/'); } catch(e) {}
+      html = window.DellmarAccount.view();
+    }
+    else if (parts[0] === "checkout" && !window.DellmarAccount.loggedIn()) {
+      try { sessionStorage.setItem('dellmar_return_to', '#/checkout'); sessionStorage.setItem('dellmar_login_reason', 'checkout'); } catch(e) {}
       html = window.DellmarAccount.view();
     }
     else if (!parts.length) html = viewHome();

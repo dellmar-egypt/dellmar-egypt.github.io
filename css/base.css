@@ -533,3 +533,9 @@ input, select, textarea { font-family: inherit; font-size: 1rem; }
 #update-ready{position:fixed;top:8px;left:12px;right:12px;z-index:1000;display:flex;align-items:center;justify-content:center;gap:12px;background:#fff8dc;color:#191f45;box-shadow:0 3px 20px #0003;padding:12px;border-radius:10px;font-size:.85rem}
 #update-ready[hidden]{display:none}
 #update-ready button{font:inherit;font-weight:800;padding:8px 12px;border:0;border-radius:8px;background:#176341;color:#fff;cursor:pointer}
+.danger-zone{max-width:540px;margin:20px auto;border:1px solid #e3b4b4}
+.danger-zone h2{font-size:1.1rem;margin-top:0;color:#9f2525}
+.btn-danger{background:#9f2525;color:#fff;border:0}
+.btn-danger:disabled{opacity:.45}
+.danger-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+#delete-confirm-input{width:100%;padding:12px;border:1px solid #ddd;border-radius:12px}
