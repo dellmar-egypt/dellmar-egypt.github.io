@@ -403,3 +403,18 @@ input, select, textarea { font-family: inherit; font-size: 1rem; }
   z-index: 100; pointer-events: none; text-align: center;
 }
 .toast.show { opacity: 1; transform: translateY(0); }
+
+/* ---------- زر واتساب ---------- */
+.btn-wa { background: #1FAF54; color: #fff; box-shadow: 0 6px 18px rgba(31,175,84,.3); }
+
+/* ---------- بانر تشخيص النبات ---------- */
+.doctor-banner {
+  display: flex; align-items: center; gap: 14px;
+  background: var(--card-bg); color: var(--card-ink);
+  border-radius: var(--radius-l); box-shadow: var(--shadow-card);
+  border: 1.5px dashed var(--accent);
+  padding: 16px 18px; font-size: .92rem;
+}
+.doctor-banner-icon { font-size: 1.9rem; }
+.doctor-banner small { opacity: .78; }
+.doctor-banner-arrow { margin-inline-start: auto; font-size: 1.6rem; color: var(--accent); font-weight: 900; }

@@ -24,7 +24,7 @@
       return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
     });
   }
-  function fmtPrice(n) { return n.toLocaleString("en-EG") + ' <small>ج.م</small>'; }
+  function fmtPrice(n) { return n == null ? '<small>يُحدد عند التوفر</small>' : n.toLocaleString("en-EG") + ' <small>ج.م</small>'; }
   function bySku(sku) { return PRODUCTS.find(function (p) { return p.sku === sku; }); }
 
   /* ---------- السلة (تُحفظ على جهاز العميل) ---------- */
@@ -111,6 +111,19 @@
     '</svg>';
   }
 
+  /* ---------- رابط طلب واتساب بالسلة ---------- */
+  function waOrderLink() {
+    var c = getCart();
+    var lines = Object.keys(c).map(function (sku) {
+      var p = bySku(sku);
+      return "- " + p.name + " × " + c[sku] + " = " + (p.price * c[sku]) + " ج.م";
+    });
+    var msg = "السلام عليكم 🌾\nأريد طلب هذه المنتجات من متجر ديلمار ايجيبت:\n" +
+      lines.join("\n") +
+      "\n----------------\nالإجمالي: " + cartTotal() + " ج.م\nالدفع عند الاستلام";
+    return "https://wa.me/201122208509?text=" + encodeURIComponent(msg);
+  }
+
   /* ---------- شارة «قريباً» ---------- */
   function soonBadge(p) { return p.soon ? '<span class="badge-soon">قريباً</span>' : ''; }
 
@@ -123,7 +136,7 @@
         '<div class="prod-name">' + esc(p.name) + '</div>' +
         '<div class="prod-ing">' + esc(p.ingredient) + '</div>' +
         '<div class="prod-foot">' +
-          '<span class="prod-price">' + fmtPrice(p.price) + '</span>' +
+          (p.soon ? '<span class="prod-price"><small>قريباً</small></span>' : '<span class="prod-price">' + fmtPrice(p.price) + '</span>') +
           (p.soon
             ? '<button class="add-btn" disabled>قريباً</button>'
             : '<button class="add-btn" data-add="' + p.sku + '">أضف للسلة</button>') +
@@ -161,6 +174,13 @@
       '<div class="trust-item"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg><strong>الدفع عند الاستلام</strong><span>ادفع عند وصول طلبك</span></div>' +
       '<div class="trust-item"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg><strong>خبرة زراعية</strong><span>منتجات أصلية مضمونة</span></div>' +
     '</div>' +
+    '<section class="section" style="padding-bottom:0">' +
+      '<a class="doctor-banner" href="#/doctor">' +
+        '<span class="doctor-banner-icon">🌿</span>' +
+        '<span><strong>نباتك مريض؟ شخّصه مجاناً</strong><br><small>صوّر الورقة أو الثمرة وأرسلها — يرد عليك مختص بالتشخيص والعلاج المناسب</small></span>' +
+        '<span class="doctor-banner-arrow">‹</span>' +
+      '</a>' +
+    '</section>' +
     '<section class="section" id="cats">' +
       '<div class="section-head">' +
         '<h2 class="section-title">تصفح حسب الفئة</h2>' +
@@ -272,6 +292,26 @@
       '</div>' +
       '<div class="cod-banner">🚚 الدفع عند الاستلام — تُحسب مصاريف الشحن عند تأكيد الطلب</div>' +
       '<a class="btn btn-block" style="margin-top:16px" href="#/checkout">إتمام الطلب</a>' +
+      '<a class="btn btn-block btn-wa" style="margin-top:10px" href="' + waOrderLink() + '" target="_blank" rel="noopener">اطلب عبر واتساب 💬</a>' +
+    '</div>';
+  }
+
+  /* ---------- شخّص نباتك ---------- */
+  function viewDoctor() {
+    return '' +
+    '<div class="cart-wrap">' +
+      '<div class="section-head"><h2 class="section-title">شخّص نباتك مجاناً</h2>' +
+      '<p class="section-sub">خدمة من مهندسي ديلمار ايجيبت</p>' +
+      '<div class="section-ornament"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg></div></div>' +
+      '<div class="form-card">' +
+        '<p style="font-size:.95rem;margin-bottom:14px">صوّر الورقة أو الثمرة المصابة صورة واضحة في ضوء النهار، وابعتها لنا على واتساب — يرد عليك مختص بالتشخيص والعلاج المناسب من منتجات ديلمار.</p>' +
+        '<div class="field"><label for="d-crop">نوع المحصول</label><select id="d-crop">' +
+          ['طماطم','بطاطس','بصل','قمح','ذرة','أرز','قطن','قصب سكر','عنب','مانجو','موالح','خيار','فلفل','فراولة','أخرى'].map(function(c){return '<option>'+c+'</option>';}).join('') +
+        '</select></div>' +
+        '<div class="field"><label for="d-sym">وصف الأعراض</label><textarea id="d-sym" placeholder="مثال: بقع بنية على الأوراق السفلية وذبول في القمة النامية…"></textarea></div>' +
+        '<button class="btn btn-block btn-wa" id="d-send">أرسل الصورة والأعراض عبر واتساب 💬</button>' +
+        '<p class="form-note">يفتح واتساب برسالة جاهزة — أرفق صورة النبات قبل الإرسال. أو اتصل بينا مباشرة: <a href="tel:01122208509" dir="ltr"><b>01122208509</b></a></p>' +
+      '</div>' +
     '</div>';
   }
 
@@ -389,6 +429,7 @@
     if (!parts.length) html = viewHome();
     else if (parts[0] === "cat") html = viewCategory(parts[1], query.sub);
     else if (parts[0] === "product") html = viewProduct(parts[1]);
+    else if (parts[0] === "doctor") html = viewDoctor();
     else if (parts[0] === "cart") html = viewCart();
     else if (parts[0] === "checkout") html = viewCheckout();
     else if (parts[0] === "done") html = viewDone(parts[1] || "");
@@ -424,6 +465,12 @@
       route();
     }
     else if (t.dataset.remove) { setQty(t.dataset.remove, 0); route(); }
+    else if (t.id === "d-send") {
+      var crop = document.getElementById("d-crop").value;
+      var sym = document.getElementById("d-sym").value.trim() || "—";
+      var msg = "السلام عليكم 🌿\nطلب تشخيص نبات\nالمحصول: " + crop + "\nالأعراض: " + sym + "\n(سأرفق صورة النبات)";
+      window.open("https://wa.me/201122208509?text=" + encodeURIComponent(msg), "_blank", "noopener");
+    }
   });
 
   document.addEventListener("submit", function (e) {
